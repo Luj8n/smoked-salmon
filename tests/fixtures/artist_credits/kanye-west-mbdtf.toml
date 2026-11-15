@@ -1,7 +1,8 @@
 album = "Kanye West, My Beautiful Dark Twisted Fantasy"
 why = "A rapper's album with up to five featured guests on a track, guests who are also the album's writers and producers."
 edition = "Roc-A-Fella 2010, 13 tracks (Deezer 707965 = MusicBrainz ef748325 by barcode; Discogs 9723759, linked from MusicBrainz). Chosen as the standard edition every store has. Qobuz 0060252747446 is the same UPC less its check digit, the same 13 tracks."
-known_wrong = ["MusicBrainz parse: 'Ye' (the artist's later name) as the main, not the credited 'Kanye West'", "merge: 'Kanye West & Ye' on every track, MusicBrainz's 'Ye' beside the stores' 'Kanye West', whatever the files' tag shape", "merge: with the files in deemix's default FLAC shape, salmon reads their plain ARTIST values as main and lets the files win over the stores that say guest, so every guest is made main and ALBUMARTIST is 'Various'", "merge: Jay-Z main and guest at once in two spellings: 'Kanye West, JAŸ-Z, ... (feat. JAY Z)'"]
+known_wrong = []
+verified_stages = ["musicbrainz", "merge", "output", "output-guests-in-title"]
 files_from = "deezer"
 output = true
 
@@ -23,7 +24,7 @@ release = ["Kanye West (main)", "Kid Cudi (guest)", "Raekwon (guest)", "JAY Z (g
 tracks = 13
 
 [today.musicbrainz]
-release = ["Ye (main)", "Kid Cudi (guest)", "Raekwon (guest)", "JAŸ-Z (guest)", "Rick Ross (guest)", "Nicki Minaj (guest)", "Bon Iver (guest)", "Pusha T (guest)", "Cyhi (guest)", "Swizz Beatz (guest)", "RZA (guest)", "John Legend (guest)"]
+release = ["Kanye West (main)", "Kid Cudi (guest)", "Raekwon (guest)", "Jay‐Z (guest)", "Rick Ross (guest)", "Nicki Minaj (guest)", "Bon Iver (guest)", "Pusha T (guest)", "CyHi da Prynce (guest)", "Swizz Beatz (guest)", "The RZA (guest)", "John Legend (guest)"]
 tracks = 13
 
 [today.discogs]
@@ -35,16 +36,16 @@ release = ["Kanye West (main)", "Kid Cudi (guest)", "Raekwon (guest)", "Jay-Z (g
 tracks = 13
 
 [today.merge]
-release = ["Kanye West (main)", "Ye (main)", "No I.D. (producer)", "RZA (producer)", "Kid Cudi (main)", "Raekwon (main)", "Mike Dean (producer)", "Symbolyc One (producer)", "JAŸ-Z (main)", "Rick Ross (main)", "Nicki Minaj (main)", "Bon Iver (main)", "JAY Z (guest)", "Pusha T (main)", "Prynce Cy Hi (main)", "Swizz Beatz (main)", "RZA (main)", "CyHi Da Prynce (guest)", "Bink! (producer)", "John Legend (main)", "Frank E (producer)", "Justin Vernon (guest)"]
+release = ["Kanye West (main)", "No I.D. (producer)", "RZA (producer)", "Kid Cudi (guest)", "Raekwon (guest)", "Mike Dean (producer)", "Symbolyc One (producer)", "JAŸ-Z (guest)", "Rick Ross (guest)", "Nicki Minaj (guest)", "Bon Iver (guest)", "Pusha T (guest)", "Prynce Cy Hi (guest)", "Swizz Beatz (guest)", "CyHi da Prynce (guest)", "The RZA (guest)", "Bink! (producer)", "John Legend (guest)", "Frank E (producer)", "Justin Vernon (guest)"]
 tracks = 13
 
 [today.output]
-albumartist = "Various"
-tracks = ["Kanye West & Ye | Dark Fantasy", "Kanye West, Kid Cudi, Raekwon, Ye | Gorgeous", "Kanye West & Ye | Power", "Kanye West & Ye | All Of The Lights (Interlude)", "Kanye West & Ye | All Of The Lights", "Kanye West, JAŸ-Z, Rick Ross, Nicki Minaj, Bon Iver, Ye (feat. JAY Z) | Monster", "Kanye West, JAŸ-Z, Pusha T, Prynce Cy Hi, Swizz Beatz, RZA, Ye (feat. JAY Z & CyHi Da Prynce) | So Appalled", "Kanye West, Rick Ross, Ye | Devil In A New Dress", "Kanye West, Pusha T, Ye | Runaway", "Kanye West & Ye | Hell Of A Life", "Kanye West, John Legend, Ye | Blame Game", "Kanye West, Bon Iver, Ye (feat. Justin Vernon) | Lost In The World", "Kanye West & Ye | Who Will Survive In America"]
+albumartist = "Kanye West"
+tracks = ["Kanye West | Dark Fantasy (Album Version (Explicit))", "Kanye West (feat. Kid Cudi & Raekwon) | Gorgeous (Album Version (Explicit))", "Kanye West | POWER (Album Version (Explicit))", "Kanye West | All Of The Lights (Interlude) (Album Version (Explicit))", "Kanye West | All Of The Lights (Album Version (Explicit))", "Kanye West (feat. Various) | Monster (Album Version (Explicit))", "Kanye West (feat. Various) | So Appalled (Album Version (Explicit))", "Kanye West (feat. Rick Ross) | Devil In A New Dress (Album Version (Explicit))", "Kanye West (feat. Pusha T) | Runaway (Album Version (Explicit))", "Kanye West | Hell Of A Life (Album Version (Explicit))", "Kanye West (feat. John Legend) | Blame Game (Album Version (Explicit))", "Kanye West (feat. Bon Iver & Justin Vernon) | Lost In The World (feat. Justin Vernon) (Album Version (Explicit))", "Kanye West | Who Will Survive In America (Album Version (Explicit))"]
 
 [today."output-guests-in-title"]
-albumartist = "Various"
-tracks = ["Kanye West & Ye | Dark Fantasy", "Kanye West, Kid Cudi, Raekwon, Ye | Gorgeous", "Kanye West & Ye | Power", "Kanye West & Ye | All Of The Lights (Interlude)", "Kanye West & Ye | All Of The Lights", "Kanye West, JAŸ-Z, Rick Ross, Nicki Minaj, Bon Iver, Ye | Monster (feat. JAY Z)", "Kanye West, JAŸ-Z, Pusha T, Prynce Cy Hi, Swizz Beatz, RZA, Ye | So Appalled (feat. JAY Z & CyHi Da Prynce)", "Kanye West, Rick Ross, Ye | Devil In A New Dress", "Kanye West, Pusha T, Ye | Runaway", "Kanye West & Ye | Hell Of A Life", "Kanye West, John Legend, Ye | Blame Game", "Kanye West, Bon Iver, Ye | Lost In The World (feat. Justin Vernon)", "Kanye West & Ye | Who Will Survive In America"]
+albumartist = "Kanye West"
+tracks = ["Kanye West | Dark Fantasy (Album Version (Explicit))", "Kanye West | Gorgeous (Album Version (Explicit)) (feat. Kid Cudi & Raekwon)", "Kanye West | POWER (Album Version (Explicit))", "Kanye West | All Of The Lights (Interlude) (Album Version (Explicit))", "Kanye West | All Of The Lights (Album Version (Explicit))", "Kanye West | Monster (Album Version (Explicit)) (feat. Various)", "Kanye West | So Appalled (Album Version (Explicit)) (feat. Various)", "Kanye West | Devil In A New Dress (Album Version (Explicit)) (feat. Rick Ross)", "Kanye West | Runaway (Album Version (Explicit)) (feat. Pusha T)", "Kanye West | Hell Of A Life (Album Version (Explicit))", "Kanye West | Blame Game (Album Version (Explicit)) (feat. John Legend)", "Kanye West | Lost In The World (feat. Justin Vernon) (Album Version (Explicit))", "Kanye West | Who Will Survive In America (Album Version (Explicit))"]
 
 # The files' tags.
 # Constructed in deemix's default FLAC shape from Deezer data (the case's own deezer fixture), not copied

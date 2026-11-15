@@ -1,7 +1,8 @@
 album = "Kyung-Wha Chung, Wiener Philharmoniker, Simon Rattle: Beethoven 5, Brahms Violin Concerto"
 why = "A symphony (orchestra + conductor) and a concerto (soloist + orchestra + conductor) on one album; Deezer drops the orchestra and conductor from the concerto, MusicBrainz writes the soloist in Hangul."
 edition = "EMI Classics 2001 (recorded live, Vienna), 7 tracks: Deezer 393087 (digital, UPC 724355716552); MusicBrainz bb465a9d is the CD (724355716521, same catalogue 5 57165); Discogs 8091122 is master 997896's main release"
-known_wrong = ["Discogs parse: 0 tracks", "Deezer parse: concerto tracks 5-7 ARTIST 'Kyung-Wha Chung' alone: orchestra and conductor lost", "both: ALBUMARTIST 'Wiener Philharmoniker, Sir Simon Rattle, Kyung-Wha Chung' (soloist last; conductor as a main); no COMPOSER on any track"]
+known_wrong = ["Deezer parse: concerto tracks 5-7 credit Kyung-Wha Chung alone, losing orchestra and conductor", "Qobuz and merge: inconsistent spellings of the soloist and orchestra remain separate credits; the conductor is still main in some sources"]
+verified_stages = ["musicbrainz", "discogs"]
 files_from = "deezer"
 
 [sources]
@@ -24,19 +25,19 @@ release = ["Wiener Philharmoniker (main)", "Sir Simon Rattle (main)", "Kyung-Wha
 tracks = 7
 
 [today.musicbrainz]
-release = ["Wiener Philharmoniker (main)", "Simon Rattle (main)", "정경화 (main)"]
+release = ["Wiener Philharmoniker (main)", "Simon Rattle (main)", "Kyung-Wha Chung (main)"]
 tracks = 7
 
 [today.discogs]
-release = []
-tracks = 0
+release = ["Kyung-Wha Chung (main)", "Wiener Philharmoniker (main)", "Sir Simon Rattle (conductor)", "Ludwig van Beethoven (composer)", "Johannes Brahms (composer)"]
+tracks = 7
 
 [today.qobuz]
-release = ["Kyung Wha Chung (main)", "Wiener Philharmonic Orchestra (guest)", "Sir Simon Rattle (guest)", "Wiener Philharmoniker (guest)", "Kyung-Wha Chung (guest)"]
+release = ["Sir Simon Rattle (main)", "Wiener Philharmonic Orchestra (main)", "Wiener Philharmoniker (guest)", "Kyung Wha Chung (main)"]
 tracks = 7
 
 [today.merge]
-release = ["Wiener Philharmoniker (main)", "Sir Simon Rattle (main)", "Kyung Wha Chung (main)", "Wiener Philharmonic Orchestra (guest)", "Kyung-Wha Chung (main)", "정경화 (main)", "Simon Rattle (main)"]
+release = ["Wiener Philharmoniker (main)", "Sir Simon Rattle (main)", "Wiener Philharmonic Orchestra (main)", "Kyung-Wha Chung (main)", "Sir Simon Rattle (conductor)", "Ludwig van Beethoven (composer)", "Johannes Brahms (composer)"]
 tracks = 7
 
 
@@ -116,6 +117,8 @@ albumartist = ["Kyung-Wha Chung"]
 date = ["2001-09-03"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# discogs: nested track data restored from the same release API on 2026-11-15.
+# qobuz: album artist list restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -296,12 +299,230 @@ discogs = '''
  ],
  "tracklist": [
   {
+   "position": "",
    "type_": "index",
-   "title": "Symphonie Nr. 5 C-Moll, Op.67 = Symphony No. 5 In C Minor = Symphonie N° 5 En Ut Mineur"
+   "title": "Symphonie Nr. 5 C-Moll, Op.67 = Symphony No. 5 In C Minor = Symphonie N° 5 En Ut Mineur",
+   "duration": "31:43",
+   "extraartists": [
+    {
+     "name": "Ludwig van Beethoven",
+     "anv": "",
+     "join": "",
+     "role": "Composed By",
+     "tracks": "",
+     "id": 95544
+    }
+   ],
+   "sub_tracks": [
+    {
+     "position": "1",
+     "type_": "track",
+     "title": "I: Allegro",
+     "duration": "7:21"
+    },
+    {
+     "position": "2",
+     "type_": "track",
+     "title": "II:  Andante Con Moto",
+     "duration": "9:04"
+    },
+    {
+     "position": "3",
+     "type_": "track",
+     "title": "III: Allegro",
+     "duration": "4:50"
+    },
+    {
+     "position": "4",
+     "type_": "track",
+     "title": "IV: Allegro – Presto",
+     "duration": "10:27"
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Violinkonzert D-Dur, Op.77 = Violin Concerto In D = Concerto Pour Violon En Ré Majeur"
+   "title": "Violinkonzert D-Dur, Op.77 = Violin Concerto In D = Concerto Pour Violon En Ré Majeur",
+   "duration": "41:22",
+   "extraartists": [
+    {
+     "name": "Johannes Brahms",
+     "anv": "",
+     "join": "",
+     "role": "Composed By",
+     "tracks": "",
+     "id": 304975
+    },
+    {
+     "name": "Kyung-Wha Chung",
+     "anv": "Kyung Wha Chung",
+     "join": "",
+     "role": "Violin, Soloist",
+     "tracks": "",
+     "id": 1199356
+    }
+   ],
+   "sub_tracks": [
+    {
+     "position": "5",
+     "type_": "track",
+     "title": "I: Allegro Non Troppo",
+     "duration": "23:29"
+    },
+    {
+     "position": "6",
+     "type_": "track",
+     "title": "II: Adagio",
+     "duration": "9:18"
+    },
+    {
+     "position": "7",
+     "type_": "track",
+     "title": "III: Allegro Giocoso, Ma Non Troppo Vivace",
+     "duration": "8:34"
+    }
+   ]
+  }
+ ],
+ "artists": [
+  {
+   "name": "Johannes Brahms",
+   "anv": "Brahms",
+   "join": "/",
+   "role": "",
+   "tracks": "",
+   "id": 304975
+  },
+  {
+   "name": "Ludwig van Beethoven",
+   "anv": "Beethoven",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 95544
+  },
+  {
+   "name": "Kyung-Wha Chung",
+   "anv": "Kyung Wha Chung",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 1199356
+  },
+  {
+   "name": "Sir Simon Rattle",
+   "anv": "Simon Rattle",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 490290
+  },
+  {
+   "name": "Wiener Philharmoniker",
+   "anv": "",
+   "join": "",
+   "role": "",
+   "tracks": "",
+   "id": 754974
+  }
+ ],
+ "extraartists": [
+  {
+   "name": "Sir Simon Rattle",
+   "anv": "",
+   "join": "",
+   "role": "Conductor",
+   "tracks": "",
+   "id": 490290
+  },
+  {
+   "name": "Georgina Curtis",
+   "anv": "",
+   "join": "",
+   "role": "Design",
+   "tracks": "",
+   "id": 1922909
+  },
+  {
+   "name": "Simon Kiln",
+   "anv": "",
+   "join": "",
+   "role": "Edited By [Editor/Schnitt/Montage]",
+   "tracks": "",
+   "id": 575952
+  },
+  {
+   "name": "Mike Clements",
+   "anv": "",
+   "join": "",
+   "role": "Engineer [Balance Engineer/Tonmeister/Ingénieur du son]",
+   "tracks": "",
+   "id": 624616
+  },
+  {
+   "name": "Andy Beer",
+   "anv": "",
+   "join": "",
+   "role": "Engineer [Technical Engineer/Tontechniker/Ingénieur technique]",
+   "tracks": "",
+   "id": 900910
+  },
+  {
+   "name": "Graham Kirkby",
+   "anv": "",
+   "join": "",
+   "role": "Engineer [Technical Engineer/Tontechniker/Ingénieur technique]",
+   "tracks": "",
+   "id": 482348
+  },
+  {
+   "name": "Peter Blaha",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 4872591
+  },
+  {
+   "name": "Michel Roubinet",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes [Traduction]",
+   "tracks": "",
+   "id": 1643161
+  },
+  {
+   "name": "Stewart Spencer",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes [Translation]",
+   "tracks": "",
+   "id": 1639543
+  },
+  {
+   "name": "Wiener Philharmoniker",
+   "anv": "",
+   "join": "",
+   "role": "Orchestra",
+   "tracks": "",
+   "id": 754974
+  },
+  {
+   "name": "Sheila Rock",
+   "anv": "",
+   "join": "",
+   "role": "Photography By [Front cover/Titelseite/En couverture]",
+   "tracks": "",
+   "id": 655922
+  },
+  {
+   "name": "Stephen Johns",
+   "anv": "",
+   "join": "",
+   "role": "Producer [Produzent/Directeur artistique]",
+   "tracks": "",
+   "id": 881682
   }
  ]
 }
@@ -381,6 +602,26 @@ qobuz = '''
     }
    }
   ]
- }
+ },
+ "artists": [
+  {
+   "name": "Kyung Wha Chung",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Sir Simon Rattle",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Wiener Philharmonic Orchestra",
+   "roles": [
+    "main-artist"
+   ]
+  }
+ ]
 }
 '''

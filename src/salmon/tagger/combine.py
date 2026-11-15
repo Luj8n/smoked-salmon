@@ -11,6 +11,7 @@ from salmon.common import re_strip
 from salmon.common.numbers import natural_key, number_or_text
 from salmon.common.strings import comparable
 from salmon.errors import TrackCombineError
+from salmon.tagger.artist_roles import merge_roles, source_roles
 from salmon.tagger.pairing import pair_by_content
 from salmon.tagger.sources import METASOURCES
 from salmon.tagger.sources.base import determine_label_type, generate_artists, standardize_genres
@@ -57,11 +58,13 @@ def combine_metadatas(*metadatas, base=None, source_url=None):  # noqa: C901
     ordered_preferences = ([source] if source in PREFERENCES else []) + [p for p in PREFERENCES if p != source]
 
     from_preferred_source = True
+    artist_preferences = {}
 
     for pref in ordered_preferences:
         for metadata in sources[pref]:
             if base is None:
                 base = metadata
+                artist_preferences = {id(t): source_roles(t) for disc in base["tracks"].values() for t in disc.values()}
                 if base.get("url", False):
                     link_source = get_source_from_link(base["url"])
                     if link_source:
@@ -82,7 +85,9 @@ def combine_metadatas(*metadatas, base=None, source_url=None):  # noqa: C901
                     base["edition_title"] = metadata["edition_title"]
 
             with contextlib.suppress(TrackCombineError):
-                base["tracks"] = combine_tracks(base["tracks"], metadata["tracks"], from_preferred_source)
+                base["tracks"] = combine_tracks(
+                    base["tracks"], metadata["tracks"], from_preferred_source, artist_preferences=artist_preferences
+                )
 
             if (
                 (not base["catno"] or not base["label"])
@@ -118,8 +123,6 @@ def combine_metadatas(*metadatas, base=None, source_url=None):  # noqa: C901
                 base["date"] = metadata["date"]
                 if metadata["year"]:
                     base["year"] = metadata["year"]
-                if str(metadata["group_year"]).isdecimal():
-                    base["group_year"] = metadata["group_year"]
             if not base["rls_type"] or base["rls_type"] == "Album":
                 base["rls_type"] = metadata["rls_type"]
             if not base["upc"]:
@@ -326,7 +329,7 @@ def _print_pairing(mtracks, ordered, reasons):
         )
 
 
-def combine_tracks(base, meta, update_track_numbers):  # noqa: C901
+def combine_tracks(base, meta, update_track_numbers, *, artist_preferences=None):  # noqa: C901
     """Combine the metadata for the tracks of two different sources."""
     # Track dictionaries reflect discovery order, so sort discs and tracks naturally before pairing.
     btracks_sorted = [
@@ -381,7 +384,7 @@ def combine_tracks(base, meta, update_track_numbers):  # noqa: C901
             ):
                 btrack["title"] = track["title"]
 
-            if btrack["title"] is None:
+            if btrack["title"] is None or (update_track_numbers and track["title"]):
                 btrack["title"] = track["title"]
 
             # Scraped title is the same than title when ignoring metadatas, and it contains accents and special
@@ -391,15 +394,15 @@ def combine_tracks(base, meta, update_track_numbers):  # noqa: C901
             ) == re_strip(unidecode(btrack["title"])):
                 btrack["title"] = track["title"]
 
+            btrack["artists"], incoming_artists = merge_roles(btrack, track, update_track_numbers, artist_preferences)
             base_artists = {(comparable(a[0]), a[1]) for a in btrack["artists"]}
-            btrack["artists"] = list(btrack["artists"])
-            variations = {(v["name"], v["role"]): v["anv"] for v in track.get("artist_variations", [])}
-            for a in track["artists"]:
+            variations = {comparable(v["name"]): comparable(v["anv"]) for v in track.get("artist_variations", [])}
+            for a in incoming_artists:
                 if (comparable(a[0]), a[1]) in base_artists:
                     continue
                 # The tags may spell the artist the way the release credits them (Discogs ANV)
-                anv = variations.get(a)
-                if anv and (comparable(anv), a[1]) in base_artists:
+                anv = variations.get(comparable(a[0]))
+                if anv and (anv, a[1]) in base_artists:
                     continue
                 btrack["artists"].append(a)
 
@@ -422,9 +425,8 @@ def combine_tracks(base, meta, update_track_numbers):  # noqa: C901
                 btrack["format"] = track["format"]
             if not btrack["isrc"]:
                 btrack["isrc"] = track["isrc"]
-            if not btrack["replay_gain"]:
+            if btrack["replay_gain"] is None:
                 btrack["replay_gain"] = track["replay_gain"]
-                btrack["title"] = track["title"]
             # A source whose numbering is not 1..n on each disc has no totals to give either.
             if usable and not btrack["tracktotal"]:
                 btrack["tracktotal"] = track["tracktotal"]

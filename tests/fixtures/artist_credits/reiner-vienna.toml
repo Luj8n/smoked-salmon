@@ -24,7 +24,7 @@ release = ["Chicago Symphony Orchestra (main)", "Fritz Reiner (main)"]
 tracks = 30
 
 [today.discogs]
-release = ["Fritz Reiner (main)", "Chicago Symphony Orchestra (main)", "Johann Strauss Jr. (composer)", "Carl Maria von Weber (composer)", "Josef Strauß (composer)", "Fritz Reiner (arranger)", "Richard Strauss (composer)"]
+release = ["Chicago Symphony Orchestra (main)", "Johann Strauss Jr. (composer)", "Fritz Reiner (conductor)", "Carl Maria von Weber (composer)", "Josef Strauß (composer)", "Fritz Reiner (main)", "Fritz Reiner (arranger)", "Richard Strauss (composer)"]
 tracks = 10
 
 [today.qobuz]
@@ -32,7 +32,7 @@ release = ["Fritz Reiner (main)", "Chicago Symphony Orchestra (guest)"]
 tracks = 10
 
 [today.merge]
-release = ["Fritz Reiner (main)", "Chicago Symphony Orchestra (main)", "Johann Strauss Jr. (composer)", "Carl Maria von Weber (composer)", "Josef Strauß (composer)", "Fritz Reiner (arranger)", "Richard Strauss (composer)"]
+release = ["Fritz Reiner (main)", "Chicago Symphony Orchestra (main)", "Johann Strauss Jr. (composer)", "Fritz Reiner (conductor)", "Carl Maria von Weber (composer)", "Josef Strauß (composer)", "Fritz Reiner (arranger)", "Richard Strauss (composer)"]
 tracks = 10
 
 # The files' tags.

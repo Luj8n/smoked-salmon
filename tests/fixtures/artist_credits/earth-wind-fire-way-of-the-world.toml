@@ -1,7 +1,7 @@
 album = "Earth, Wind & Fire, That's the Way of the World"
 why = "One band whose name holds a comma and an ampersand: a split anywhere makes three artists out of one."
 edition = "Columbia, 8 tracks, as sold digitally (Deezer 1444091 = MusicBrainz 09652847 by barcode); Discogs 502117 is master 99532's main release (1975 LP); Qobuz has the same UPC"
-known_wrong = ["Deezer parse: the band split at its comma and ampersand into Earth, Wind and Fire, three main artists", "Qobuz parse and merge: Maurice White, the band's leader, a guest on the three tracks where Qobuz names him as the performer; written as '(feat. Maurice White)'"]
+known_wrong = ["Qobuz parse and merge: Maurice White, the band's leader, a guest on the three tracks where Qobuz names him as the performer; written as '(feat. Maurice White)'"]
 files_from = "deezer"
 output = true
 
@@ -17,7 +17,7 @@ release_main = ["Earth, Wind & Fire"]
 how_we_know = "Deezer's album artist, MusicBrainz, Discogs and Qobuz all credit the band as one artist"
 
 [today.deezer]
-release = ["Earth (main)", "Wind (main)", "Fire (main)"]
+release = ["Earth, Wind & Fire (main)"]
 tracks = 8
 
 [today.musicbrainz]
@@ -38,11 +38,11 @@ tracks = 8
 
 [today.output]
 albumartist = "Earth, Wind & Fire"
-tracks = ["Earth, Wind & Fire | Shining Star", "Earth, Wind & Fire | That's The Way Of The World", "Earth, Wind & Fire (feat. Maurice White) | Happy Feelin'", "Earth, Wind & Fire (feat. Maurice White) | All About Love", "Earth, Wind & Fire | Yearnin' Learnin'", "Earth, Wind & Fire (feat. Maurice White) | Reasons", "Earth, Wind & Fire | Africano", "Earth, Wind & Fire | See The Light"]
+tracks = ["Earth, Wind & Fire | Shining Star", "Earth, Wind & Fire | That’s the Way of the World", "Earth, Wind & Fire (feat. Maurice White) | Happy Feelin'", "Earth, Wind & Fire (feat. Maurice White) | All About Love (First Impression)", "Earth, Wind & Fire | Yearnin' Learnin'", "Earth, Wind & Fire (feat. Maurice White) | Reasons", "Earth, Wind & Fire | Africano", "Earth, Wind & Fire | See the Light"]
 
 [today."output-guests-in-title"]
 albumartist = "Earth, Wind & Fire"
-tracks = ["Earth, Wind & Fire | Shining Star", "Earth, Wind & Fire | That's The Way Of The World", "Earth, Wind & Fire | Happy Feelin' (feat. Maurice White)", "Earth, Wind & Fire | All About Love (feat. Maurice White)", "Earth, Wind & Fire | Yearnin' Learnin'", "Earth, Wind & Fire | Reasons (feat. Maurice White)", "Earth, Wind & Fire | Africano", "Earth, Wind & Fire | See The Light"]
+tracks = ["Earth, Wind & Fire | Shining Star", "Earth, Wind & Fire | That’s the Way of the World", "Earth, Wind & Fire | Happy Feelin' (feat. Maurice White)", "Earth, Wind & Fire | All About Love (First Impression) (feat. Maurice White)", "Earth, Wind & Fire | Yearnin' Learnin'", "Earth, Wind & Fire | Reasons (feat. Maurice White)", "Earth, Wind & Fire | Africano", "Earth, Wind & Fire | See the Light"]
 
 
 # The files' tags.

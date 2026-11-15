@@ -2,6 +2,7 @@ album = "Santana, Supernatural"
 why = "A band album full of one-track featured singers: Deezer and MusicBrainz agree track by track; Discogs adds band members as guests and a 'No Artist' main."
 edition = "Columbia/Legacy remaster, 14 tracks (Deezer 7040992 = MusicBrainz b43f421d by barcode); Discogs 807636 is master 77696's main release (1999 Arista CD); the Legacy Edition (Deezer 8248624, 24 tracks) left out"
 known_wrong = []
+verified_stages = ["discogs", "merge"]
 files_from = "deezer"
 
 [sources]
@@ -21,11 +22,11 @@ release = ["Santana (main)", "Dave Matthews (guest)", "Carter Beauford (guest)",
 tracks = 14
 
 [today.musicbrainz]
-release = ["Santana (main)", "Dave Matthews (guest)", "Carter Beauford (guest)", "Everlast (guest)", "Rob Thomas (guest)", "Ms. Lauryn Hill (guest)", "CeeLo Green (guest)", "The Product G&B (guest)", "Maná (guest)", "Eagle‐Eye Cherry (guest)", "Eric Clapton (guest)"]
+release = ["Santana (main)", "Dave Matthews (guest)", "Carter Beauford (guest)", "Everlast (guest)", "Rob Thomas (guest)", "Lauryn Hill (guest)", "Cee‐Lo (guest)", "The Product G&B (guest)", "Maná (guest)", "Eagle‐Eye Cherry (guest)", "Eric Clapton (guest)"]
 tracks = 14
 
 [today.discogs]
-release = ["Santana (main)", "Carlos Santana (guest)", "Karl Perazzo (guest)", "Tony Lindsay (guest)", "Dave Matthews (guest)", "Everlast (guest)", "Rob Thomas (guest)", "Lauryn Hill (guest)", "Cee-Lo (guest)", "Lauryn Hill (arranger)", "KC Porter (guest)", "Maná (guest)", "Eagle-Eye Cherry (guest)", "Eric Clapton (guest)", "Jeanie Tracy (guest)", "No Artist (main)"]
+release = ["Santana (main)", "Carlos Santana (guest)", "Karl Perazzo (guest)", "Tony Lindsay (guest)", "Dave Matthews (guest)", "Everlast (guest)", "Rob Thomas (guest)", "Lauryn Hill (guest)", "Cee-Lo (guest)", "Lauryn Hill (arranger)", "KC Porter (guest)", "Maná (guest)", "Eagle-Eye Cherry (guest)", "Eric Clapton (guest)", "Jeanie Tracy (guest)"]
 tracks = 15
 
 [today.qobuz]
@@ -33,7 +34,7 @@ release = ["Santana (main)"]
 tracks = 14
 
 [today.merge]
-release = ["Santana (main)", "Dave Matthews (main)", "Carter Beauford (main)", "Everlast (main)", "Rob Thomas (main)", "Ms. Lauryn Hill (guest)", "CeeLo Green (guest)", "The Product G&B (main)", "Maná (main)", "Eagle-Eye Cherry (main)", "Eric Clapton (main)"]
+release = ["Santana (main)", "Dave Matthews (guest)", "Carter Beauford (guest)", "Everlast (guest)", "Rob Thomas (guest)", "Cee-Lo (guest)", "Ms. Lauryn Hill (guest)", "The Product G&B (guest)", "Maná (guest)", "Eagle-Eye Cherry (guest)", "Eric Clapton (guest)"]
 tracks = 14
 
 # The files' tags.

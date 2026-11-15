@@ -1,7 +1,7 @@
 album = "Fritz Reiner, Wiener Philharmoniker: Brahms Hungarian Dances, Dvořák Slavonic Dances"
 why = "Two composers, one orchestra and conductor (Reiner, Wiener Philharmoniker, Sofiensaal June 1960: Decca SXL 2249 / London CS 6198): COMPOSER per work, ARTIST orchestra then conductor. Discogs' parse loses every track."
 edition = "Deezer 579002271: Archipel 2023 remaster of the same 1960 recording, 13 tracks (Brahms and Dvořák only; Decca's own digital, 028948102617, adds Strauss); MusicBrainz 688898bc: Decca Weekend Classics CD 417 696-2 (1988, 028941769626, 13 tracks); Discogs 4899421: the same Decca CD. The original: Discogs master 591895, London CS 6198 (US, Nov 1960), Decca SXL 2249 (UK, 1961)"
-known_wrong = ["Discogs parse: 0 tracks: the tracklist is two index tracks (Hungarian Dances, 8 sub-tracks; Slavonic Dances, 5) and the parser drops sub-tracks", "Deezer parse: ARTIST 'Fritz Reiner & Vienna Philharmonic', conductor before orchestra; Reiner main, not conductor", "Deezer and MusicBrainz parse: no COMPOSER role on any track (Brahms, Dvořák absent)"]
+known_wrong = ["Discogs' release credits do not name the orchestra, so its parse only supplies the conductor and composers", "Deezer parse: conductor before orchestra, Reiner main rather than conductor", "Deezer and MusicBrainz parse: no composer roles on the tracks"]
 files_from = "deezer"
 
 [sources]
@@ -27,15 +27,15 @@ release = ["Wiener Philharmoniker (main)", "Fritz Reiner (main)"]
 tracks = 13
 
 [today.discogs]
-release = []
-tracks = 0
+release = ["Johannes Brahms (composer)", "Fritz Reiner (conductor)", "Antonín Dvořák (composer)"]
+tracks = 13
 
 [today.qobuz]
 release = ["Fritz Reiner (main)", "Vienna Philharmonic (guest)"]
 tracks = 13
 
 [today.merge]
-release = ["Fritz Reiner (main)", "Vienna Philharmonic (main)", "Wiener Philharmoniker (main)"]
+release = ["Fritz Reiner (main)", "Vienna Philharmonic (main)", "Wiener Philharmoniker (main)", "Johannes Brahms (composer)", "Fritz Reiner (conductor)", "Antonín Dvořák (composer)"]
 tracks = 13
 
 # The files' tags.
@@ -174,6 +174,8 @@ albumartist = ["Fritz Reiner"]
 date = ["2011-12-07"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# discogs: nested track data restored from the same release API on 2026-11-15.
+# qobuz: album artist list restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -481,12 +483,170 @@ discogs = '''
  ],
  "tracklist": [
   {
+   "position": "",
    "type_": "index",
-   "title": "Hungarian Dances"
+   "title": "Hungarian Dances",
+   "duration": "",
+   "artists": [
+    {
+     "name": "Johannes Brahms",
+     "anv": "",
+     "join": "",
+     "role": "",
+     "tracks": "",
+     "id": 304975
+    }
+   ],
+   "sub_tracks": [
+    {
+     "position": "1",
+     "type_": "track",
+     "title": "No. 5 In G Minor ",
+     "duration": ""
+    },
+    {
+     "position": "2",
+     "type_": "track",
+     "title": "No. 6 In D Major \t",
+     "duration": ""
+    },
+    {
+     "position": "3",
+     "type_": "track",
+     "title": "No. 7 In A Major",
+     "duration": ""
+    },
+    {
+     "position": "4",
+     "type_": "track",
+     "title": "No. 12 In D Minor \t",
+     "duration": ""
+    },
+    {
+     "position": "5",
+     "type_": "track",
+     "title": "No. 13 In D Major ",
+     "duration": ""
+    },
+    {
+     "position": "6",
+     "type_": "track",
+     "title": "No. 19 In B Minor \t",
+     "duration": ""
+    },
+    {
+     "position": "7",
+     "type_": "track",
+     "title": "No. 21 In E Minor ",
+     "duration": ""
+    },
+    {
+     "position": "8",
+     "type_": "track",
+     "title": "No. 1 In G Minor ",
+     "duration": ""
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Slavonic Dances"
+   "title": "Slavonic Dances",
+   "duration": "",
+   "artists": [
+    {
+     "name": "Antonín Dvořák",
+     "anv": "",
+     "join": "",
+     "role": "",
+     "tracks": "",
+     "id": 268272
+    }
+   ],
+   "sub_tracks": [
+    {
+     "position": "9",
+     "type_": "track",
+     "title": "Opus 46, No. 1 In C Major \t\t",
+     "duration": ""
+    },
+    {
+     "position": "10",
+     "type_": "track",
+     "title": "Opus 46, No. 3 In A Flat Major ",
+     "duration": ""
+    },
+    {
+     "position": "11",
+     "type_": "track",
+     "title": "Opus 46, No. 8 In G Minor \t",
+     "duration": ""
+    },
+    {
+     "position": "12",
+     "type_": "track",
+     "title": "Opus 72, No. 2 In E Minor ",
+     "duration": ""
+    },
+    {
+     "position": "13",
+     "type_": "track",
+     "title": "Opus 72, No. 1 In B Major ",
+     "duration": ""
+    }
+   ]
+  }
+ ],
+ "artists": [
+  {
+   "name": "Johannes Brahms",
+   "anv": "Brahms",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 304975
+  },
+  {
+   "name": "Antonín Dvořák",
+   "anv": "Dvorak",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 268272
+  },
+  {
+   "name": "Fritz Reiner",
+   "anv": "",
+   "join": "",
+   "role": "",
+   "tracks": "",
+   "id": 406283
+  }
+ ],
+ "extraartists": [
+  {
+   "name": "Antonín Dvořák",
+   "anv": "",
+   "join": "",
+   "role": "Composed By",
+   "tracks": "9 to 13",
+   "id": 268272
+  },
+  {
+   "name": "Johannes Brahms",
+   "anv": "",
+   "join": "",
+   "role": "Composed By",
+   "tracks": "1 to 8",
+   "id": 304975
+  },
+  {
+   "name": "Fritz Reiner",
+   "anv": "",
+   "join": "",
+   "role": "Conductor",
+   "tracks": "",
+   "id": 406283
   }
  ]
 }
@@ -588,6 +748,21 @@ qobuz = '''
     "performers": "Antonín Dvorák, Composer - Fritz Reiner, Composer, MainArtist - Vienna Philharmonic, Orchestra, MainArtist"
    }
   ]
- }
+ },
+ "artists": [
+  {
+   "name": "Fritz Reiner",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Wiener Philharmonic Orchestra",
+   "roles": [
+    "main-artist",
+    "orchestra"
+   ]
+  }
+ ]
 }
 '''

@@ -1,7 +1,8 @@
 album = "Puccini, La Bohème: Karajan, Berliner Philharmoniker"
 why = "A famous opera: Deezer makes the composer a main artist, and the stores list 14 or 15 performers. Discogs' parse loses every track."
 edition = "Decca 2024 remaster (Deezer, MusicBrainz); Qobuz ayakfjxmkegvb is another issue of the same recording, UPC 0028948712984"
-known_wrong = ["Deezer parse: Giacomo Puccini a main artist (and in ARTIST on every track of the files tagged from it); Herbert von Karajan a main, not conductor; no composer role", "MusicBrainz parse: chorus master Walter Hagen-Groll a main artist; Karajan a main, not conductor", "Discogs parse: 0 tracks", "merge: Puccini and Hagen-Groll both main"]
+known_wrong = ["Deezer parse: Giacomo Puccini a main artist; Herbert von Karajan main rather than conductor", "MusicBrainz parse: chorus master Walter Hagen-Groll main; Karajan main rather than conductor", "merge: Puccini and Hagen-Groll still main from sources that credit them that way"]
+verified_stages = ["discogs"]
 files_from = "deezer"
 
 [sources]
@@ -24,15 +25,15 @@ release = ["Walter Hagen-Groll (main)", "Chor der Deutschen Oper Berlin (main)",
 tracks = 31
 
 [today.discogs]
-release = []
-tracks = 0
+release = ["Luciano Pavarotti (main)", "Mirella Freni (main)", "Nicolai Ghiaurov (main)", "Elizabeth Harwood (main)", "Rolando Panerai (main)", "Gianni Maffeo (main)", "Berliner Philharmoniker (main)", "Giacomo Puccini (composer)", "Herbert von Karajan (conductor)"]
+tracks = 5
 
 [today.qobuz]
 release = ["Luciano Pavarotti (main)", "Rolando Panerai (guest)", "Nicolai Ghiaurov (guest)", "Berliner Philharmoniker (guest)", "Herbert Von Karajan (guest)", "Gianni Maffeo (guest)", "Michel Sénéchal (guest)", "Mirella Freni (guest)", "Schöneberger Sängerknaben (guest)", "Chor Der Deutschen Oper Berlin (guest)", "Gernot Pietsch (guest)", "Elizabeth Harwood (guest)", "Hans-Dietrich Pohl (guest)", "Hans-Dieter Appell (guest)"]
 tracks = 31
 
 [today.merge]
-release = ["Rolando Panerai (main)", "Luciano Pavarotti (main)", "Nicolai Ghiaurov (main)", "Berliner Philharmoniker (main)", "Herbert von Karajan (main)", "Giacomo Puccini (main)", "Walter Hagen-Groll (main)", "Chor der Deutschen Oper Berlin (main)", "Schöneberger Sängerknaben (main)", "Gianni Maffeo (main)", "Michel Sénéchal (main)", "Mirella Freni (main)", "Gernot Pietsch (main)", "Elizabeth Harwood (main)", "Hans-Dietrich Pohl (main)", "Hans-Dieter Appell (main)", "Hans-Dieter Appelt (main)"]
+release = ["Mirella Freni (main)", "Luciano Pavarotti (main)", "Berliner Philharmoniker (main)", "Herbert von Karajan (main)", "Giacomo Puccini (main)", "Walter Hagen-Groll (main)", "Chor der Deutschen Oper Berlin (main)", "Nicolaï Ghiaurov (main)", "Rolando Panerai (main)", "Schöneberger Sängerknaben (main)", "Gianni Maffeo (main)", "Gernot Pietsch (main)", "Michel Sénéchal (main)", "Elizabeth Harwood (main)", "Giacomo Puccini (composer)", "Herbert von Karajan (conductor)", "Hans-Dietrich Pohl (main)", "Hans-Dieter Appell (main)", "Hans-Dieter Appelt (main)"]
 tracks = 31
 
 # The files' tags.
@@ -351,6 +352,7 @@ albumartist = ["Luciano Pavarotti"]
 date = ["2025-04-04"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# discogs: nested track data restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -1316,8 +1318,302 @@ discogs = '''
  ],
  "tracklist": [
   {
+   "position": "",
    "type_": "index",
-   "title": "La Bohème"
+   "title": "La Bohème",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "A",
+     "type_": "track",
+     "title": "1. Akt (Teil 1) \"Questo Mar Rosso\"",
+     "duration": ""
+    },
+    {
+     "position": "B1",
+     "type_": "track",
+     "title": "1. Akt (Schluß) \"Ehi! Rodolfo!\"",
+     "duration": ""
+    },
+    {
+     "position": "B2",
+     "type_": "track",
+     "title": "2. Akt \"Aranci, Ninnoli!\"",
+     "duration": ""
+    },
+    {
+     "position": "C",
+     "type_": "track",
+     "title": "3. Akt \"Ohè Là, Le Guardie!\"",
+     "duration": ""
+    },
+    {
+     "position": "D",
+     "type_": "track",
+     "title": "4. Akt \"In Un Coupé?\"",
+     "duration": ""
+    }
+   ]
+  }
+ ],
+ "artists": [
+  {
+   "name": "Giacomo Puccini",
+   "anv": "Puccini",
+   "join": "-",
+   "role": "",
+   "tracks": "",
+   "id": 369053
+  },
+  {
+   "name": "Luciano Pavarotti",
+   "anv": "Pavarotti",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 55683
+  },
+  {
+   "name": "Mirella Freni",
+   "anv": "Freni",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 837529
+  },
+  {
+   "name": "Nicolai Ghiaurov",
+   "anv": "Ghiaurov",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 842223
+  },
+  {
+   "name": "Elizabeth Harwood",
+   "anv": "Harwood",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 1477181
+  },
+  {
+   "name": "Rolando Panerai",
+   "anv": "Panerai",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 973042
+  },
+  {
+   "name": "Gianni Maffeo",
+   "anv": "Maffeo",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 2085393
+  },
+  {
+   "name": "Berliner Philharmoniker",
+   "anv": "Berlin Philharmonic Orchestra",
+   "join": "·",
+   "role": "",
+   "tracks": "",
+   "id": 260744
+  },
+  {
+   "name": "Herbert von Karajan",
+   "anv": "",
+   "join": "",
+   "role": "",
+   "tracks": "",
+   "id": 283122
+  }
+ ],
+ "extraartists": [
+  {
+   "name": "Schöneberger Sängerknaben",
+   "anv": "Schöneberger Boys Choir",
+   "join": "",
+   "role": "Choir",
+   "tracks": "",
+   "id": 491155
+  },
+  {
+   "name": "Chor Der Deutschen Oper Berlin",
+   "anv": "Chorus Of The Deutsche Oper, Berlin",
+   "join": "",
+   "role": "Chorus",
+   "tracks": "",
+   "id": 850906
+  },
+  {
+   "name": "Walter Hagen-Groll",
+   "anv": "",
+   "join": "",
+   "role": "Chorus Master",
+   "tracks": "",
+   "id": 836798
+  },
+  {
+   "name": "Giacomo Puccini",
+   "anv": "",
+   "join": "",
+   "role": "Composed By",
+   "tracks": "",
+   "id": 369053
+  },
+  {
+   "name": "Herbert von Karajan",
+   "anv": "",
+   "join": "",
+   "role": "Conductor",
+   "tracks": "",
+   "id": 283122
+  },
+  {
+   "name": "Colin Moorfoot",
+   "anv": "",
+   "join": "",
+   "role": "Engineer",
+   "tracks": "",
+   "id": 864304
+  },
+  {
+   "name": "Gordon Parry",
+   "anv": "",
+   "join": "",
+   "role": "Engineer",
+   "tracks": "",
+   "id": 833090
+  },
+  {
+   "name": "James Lock (2)",
+   "anv": "",
+   "join": "",
+   "role": "Engineer",
+   "tracks": "",
+   "id": 837672
+  },
+  {
+   "name": "Giuseppe Giacosa",
+   "anv": "",
+   "join": "",
+   "role": "Libretto By",
+   "tracks": "",
+   "id": 696162
+  },
+  {
+   "name": "Luigi Illica",
+   "anv": "",
+   "join": "",
+   "role": "Libretto By",
+   "tracks": "",
+   "id": 696240
+  },
+  {
+   "name": "Berliner Philharmoniker",
+   "anv": "Berlin Philharmonic Orchestra",
+   "join": "",
+   "role": "Orchestra",
+   "tracks": "",
+   "id": 260744
+  },
+  {
+   "name": "Antonio Tonini",
+   "anv": "",
+   "join": "",
+   "role": "Other [Stylistic Adviser]",
+   "tracks": "",
+   "id": 0
+  },
+  {
+   "name": "James Mallinson",
+   "anv": "",
+   "join": "",
+   "role": "Producer",
+   "tracks": "",
+   "id": 624538
+  },
+  {
+   "name": "Ray Minshull",
+   "anv": "",
+   "join": "",
+   "role": "Producer",
+   "tracks": "",
+   "id": 861269
+  },
+  {
+   "name": "Hans-Dietrich Pohl",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [A Custom-house Official]",
+   "tracks": "",
+   "id": 2402253
+  },
+  {
+   "name": "Michel Sénéchal",
+   "anv": "Michel Senechal",
+   "join": "",
+   "role": "Vocals [Benoit, Alcindoro]",
+   "tracks": "",
+   "id": 1092548
+  },
+  {
+   "name": "Nicolai Ghiaurov",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Colline]",
+   "tracks": "",
+   "id": 842223
+  },
+  {
+   "name": "Rolando Panerai",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Marcello]",
+   "tracks": "",
+   "id": 973042
+  },
+  {
+   "name": "Mirella Freni",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Mimi]",
+   "tracks": "",
+   "id": 837529
+  },
+  {
+   "name": "Elizabeth Harwood",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Musetta]",
+   "tracks": "",
+   "id": 1477181
+  },
+  {
+   "name": "Gernot Pietsch",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Parpignol]",
+   "tracks": "",
+   "id": 1121947
+  },
+  {
+   "name": "Luciano Pavarotti",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Rodolfo]",
+   "tracks": "",
+   "id": 55683
+  },
+  {
+   "name": "Hans-Dieter Appelt",
+   "anv": "",
+   "join": "",
+   "role": "Vocals [Sergeant]",
+   "tracks": "",
+   "id": 2402252
   }
  ]
 }

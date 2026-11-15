@@ -1,7 +1,8 @@
 album = "Dolly Parton, Linda Ronstadt, Emmylou Harris, Trio"
 why = "Three co-leaders, all main on every track (the shape of #869's Gladiator)."
 edition = "Qobuz 0603497870400 is the 2016 Remaster under another UPC, another edition with the same 11 tracks. Discogs 1832388 is master 14721's main release (1987 LP)."
-known_wrong = ["Qobuz parse: Linda Ronstadt and Emmylou Harris made guests. Qobuz names all three main-artist on the album and MainArtist on every track; the parser takes the album's one `artist` as main and reads every other MainArtist as a guest (the Gladiator shape, #869)"]
+known_wrong = []
+verified_stages = ["qobuz"]
 files_from = "deezer"
 
 [sources]
@@ -24,15 +25,15 @@ release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main
 tracks = 11
 
 [today.discogs]
-release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main)", "Avie Lee (arranger)", "Emmylou Harris (arranger)", "John Starling (arranger)"]
+release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main)", "David Campbell (conductor)", "Avie Lee (arranger)", "Emmylou Harris (arranger)", "John Starling (arranger)"]
 tracks = 11
 
 [today.qobuz]
-release = ["Dolly Parton (main)", "Linda Ronstadt (guest)", "Emmylou Harris (guest)"]
+release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main)"]
 tracks = 11
 
 [today.merge]
-release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main)", "Avie Lee (arranger)", "Emmylou Harris (arranger)", "John Starling (arranger)"]
+release = ["Dolly Parton (main)", "Linda Ronstadt (main)", "Emmylou Harris (main)", "David Campbell (conductor)", "Avie Lee (arranger)", "Emmylou Harris (arranger)", "John Starling (arranger)"]
 tracks = 11
 
 
@@ -152,6 +153,7 @@ albumartist = ["Dolly Parton"]
 date = ["1987-03-03"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# qobuz: album artist list restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -1130,6 +1132,26 @@ qobuz = '''
     "performers": "Dolly Parton, MainArtist, Vocals - Linda Ronstadt, MainArtist, Vocals - Emmylou Harris, MainArtist, Vocals - George Massenburg, Producer - John Boylan, Digital Remastering Masterer - Traditional, Writer"
    }
   ]
- }
+ },
+ "artists": [
+  {
+   "name": "Dolly Parton",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Linda Ronstadt",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Emmylou Harris",
+   "roles": [
+    "main-artist"
+   ]
+  }
+ ]
 }
 '''

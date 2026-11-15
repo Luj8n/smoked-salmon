@@ -1,7 +1,8 @@
 album = "Ella Fitzgerald and Louis Armstrong, Ella and Louis"
 why = "Two co-leaders that Deezer, MusicBrainz and Discogs agree on: the control for the co-leader shape, which Qobuz's parse gets wrong here too."
 edition = "Deezer 70493232: Verve Reissues digital, 11 tracks; MusicBrainz has no release with that barcode, so 54f13825 (Verve 2005 CD, 602498840214, same 11 tracks); Discogs 13662230 is master 173462's main release (1956 MG V-4003 LP)"
-known_wrong = ["Qobuz parse: Louis Armstrong made a guest. The parser takes the album's one `artist` as main and reads every other main artist as a guest (the Gladiator shape, #869)"]
+known_wrong = []
+verified_stages = ["qobuz"]
 files_from = "deezer"
 
 [sources]
@@ -28,7 +29,7 @@ release = ["Ella Fitzgerald (main)", "Louis Armstrong (main)"]
 tracks = 11
 
 [today.qobuz]
-release = ["Ella Fitzgerald (main)", "Louis Armstrong (guest)"]
+release = ["Ella Fitzgerald (main)", "Louis Armstrong (main)"]
 tracks = 11
 
 [today.merge]
@@ -151,6 +152,7 @@ albumartist = ["Ella Fitzgerald"]
 date = ["2011-07-14"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# qobuz: album artist list restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -563,6 +565,20 @@ qobuz = '''
     "performers": "Ella Fitzgerald, MainArtist, Vocalist - Louis Armstrong, MainArtist, Vocalist - Norman Granz, Producer - Val Valentin, RecordingEngineer - Yip Harburg, Composer - Vernon Duke, Lyricist"
    }
   ]
- }
+ },
+ "artists": [
+  {
+   "name": "Ella Fitzgerald",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "Louis Armstrong",
+   "roles": [
+    "main-artist"
+   ]
+  }
+ ]
 }
 '''

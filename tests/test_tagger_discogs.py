@@ -44,6 +44,15 @@ def test_discogs_artist_who_arranged_their_own_track_stays_its_main_artist() -> 
     assert parse_artists([], track) == [("Main Artist", "main"), ("Main Artist", "arranger")]
 
 
+def test_discogs_artist_who_produced_their_track_stays_its_main_artist() -> None:
+    track = {"extraartists": [{"name": "Queen", "role": "Producer"}, {"name": "Mack", "role": "Producer"}]}
+    assert parse_artists([{"name": "Queen"}], track) == [("Queen", "main"), ("Queen", "producer"), ("Mack", "producer")]
+
+
+def test_discogs_no_artist_placeholder_is_not_a_performer() -> None:
+    assert parse_artists([], {"artists": [{"name": "No Artist"}]}) == []
+
+
 def test_discogs_multi_disc_positions_without_headings_split_by_disc() -> None:
     scraper = Scraper()
     soup = make_soup(
@@ -132,8 +141,103 @@ def test_discogs_vinyl_style_positions_keep_their_side_prefixed_keys() -> None:
     assert tracks["1"]["B1"]["disc#"] == "1"
 
 
+def test_discogs_reads_nested_index_tracks_with_work_titles_and_inherited_credits():
+    soup = {
+        "artists": [artist("Orchestra")],
+        "tracklist": [
+            {
+                "type_": "index",
+                "title": "Concerto",
+                "extraartists": [{"name": "Composer", "role": "Composed By"}],
+                "sub_tracks": [
+                    track("1", "Allegro"),
+                    {"type_": "index", "title": "Finale", "sub_tracks": [track("2", "Presto")]},
+                ],
+            }
+        ],
+    }
+    tracks = asyncio.run(Scraper().parse_tracks(soup))["1"]
+    assert [t["title"] for t in tracks.values()] == ["Concerto: Allegro", "Concerto: Finale: Presto"]
+    assert all(t["artists"] == [("Orchestra", "main"), ("Composer", "composer")] for t in tracks.values())
+
+
+def test_discogs_child_artist_credit_overrides_its_index_credit():
+    soup = {
+        "artists": [artist("Album Artist")],
+        "tracklist": [
+            {
+                "type_": "index",
+                "title": "Work",
+                "artists": [artist("Work Artist")],
+                "sub_tracks": [track("1", "First"), {**track("2", "Second"), "artists": [artist("Soloist")]}],
+            }
+        ],
+    }
+    tracks = asyncio.run(Scraper().parse_tracks(soup))["1"]
+    assert tracks["1"]["artists"] == [("Work Artist", "main")]
+    assert tracks["2"]["artists"] == [("Soloist", "main")]
+
+
+def test_discogs_medley_sub_tracks_do_not_split_a_numbered_audio_track():
+    soup = make_soup([{**track("1", "Medley"), "sub_tracks": [track("1a", "Part A"), track("1b", "Part B")]}])
+    tracks = asyncio.run(Scraper().parse_tracks(soup))["1"]
+    assert list(tracks) == ["1"]
+    assert tracks["1"]["title"] == "Medley"
+
+
+def test_discogs_index_parts_keep_their_explicit_disc_number():
+    assert _clean_discogs_position("2-03b", 1) == ("2", "3B")
+
+
+def test_classical_work_composers_do_not_replace_the_performers_or_leak_to_other_works():
+    soup = {
+        "genres": ["Classical"],
+        "artists": [artist("Composer A"), artist("Composer B"), artist("Orchestra"), artist("Conductor")],
+        "extraartists": [
+            {"name": "Composer A", "role": "Composed By", "tracks": "1 to 2"},
+            {"name": "Composer B", "role": "Composed By", "tracks": "3"},
+            {"name": "Conductor", "role": "Conductor", "tracks": ""},
+        ],
+        "tracklist": [
+            {
+                "type_": "index",
+                "title": "Work A",
+                "artists": [artist("Composer A")],
+                "sub_tracks": [track("1", "First"), track("2", "Second")],
+            },
+            {
+                "type_": "index",
+                "title": "Work B",
+                "artists": [artist("Composer B")],
+                "sub_tracks": [track("3", "Third")],
+            },
+        ],
+    }
+    tracks = asyncio.run(Scraper().parse_tracks(soup))["1"]
+    for number, t in tracks.items():
+        composer = "Composer B" if number == "3" else "Composer A"
+        assert set(t["artists"]) == {("Orchestra", "main"), ("Conductor", "conductor"), (composer, "composer")}
+
+
 def artist(name: str, join: str = "") -> dict:
     return {"name": name, "join": join}
+
+
+@pytest.mark.parametrize("performance_role", ["Piano", "Soloist [Violin]", "Vocals"])
+def test_classical_composer_keeps_main_credit_only_on_tracks_they_perform(performance_role):
+    soup = {
+        "genres": ["Classical"],
+        "artists": [artist("Composer"), artist("Orchestra")],
+        "extraartists": [
+            {"name": "Composer", "role": "Composed By"},
+            {"name": "Composer", "role": performance_role, "tracks": "1"},
+        ],
+        "tracklist": [track("1", "Own Performance"), track("2", "Other Performance")],
+    }
+    tracks = asyncio.run(Scraper().parse_tracks(soup))["1"]
+    assert ("Composer", "main") in tracks["1"]["artists"]
+    assert ("Composer", "main") not in tracks["2"]["artists"]
+    assert all(("Composer", "composer") in t["artists"] for t in tracks.values())
 
 
 def test_discogs_feat_join_makes_following_artists_guests() -> None:

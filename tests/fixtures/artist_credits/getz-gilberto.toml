@@ -2,6 +2,7 @@ album = "Stan Getz and João Gilberto, Getz/Gilberto"
 why = "A famous two-leader album: Qobuz lists both as main-artist and salmon's parser makes Gilberto a guest; Deezer's roles give 'Various'."
 edition = "Discogs 170884 is master 85178's main release (1964 LP), the 8 tracks of the 18 here."
 known_wrong = ["Deezer parse: Jobim both guest and main, ALBUMARTIST 'Various'"]
+verified_stages = ["qobuz"]
 files_from = "deezer"
 
 [sources]
@@ -29,11 +30,11 @@ release = ["Stan Getz (main)", "João Gilberto (main)", "Astrud Gilberto (guest)
 tracks = 8
 
 [today.qobuz]
-release = ["Stan Getz (main)", "Joao Gilberto (guest)", "António Carlos Jobim (guest)", "Astrud Gilberto (guest)", "João Gilberto Quintet (guest)"]
+release = ["Stan Getz (main)", "João Gilberto (main)", "António Carlos Jobim (guest)", "Astrud Gilberto (guest)", "João Gilberto Quintet (guest)"]
 tracks = 18
 
 [today.merge]
-release = ["Stan Getz (main)", "João Gilberto (main)", "Antonio Carlos Jobim (main)", "Astrud Gilberto (main)", "João Gilberto Quintet (main)", "Antonio Carlos Jobim (guest)", "Astrud Gilberto (guest)"]
+release = ["Stan Getz (main)", "João Gilberto (main)", "Antonio Carlos Jobim (guest)", "Astrud Gilberto (guest)", "Antonio Carlos Jobim (main)", "João Gilberto Quintet (main)"]
 tracks = 18
 
 
@@ -223,6 +224,7 @@ albumartist = ["Stan Getz"]
 date = ["2014-05-27"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# qobuz: album artist list restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -1082,6 +1084,20 @@ qobuz = '''
     "performers": "Stan Getz, MainArtist - Joao Gilberto, MainArtist - Astrud Gilberto, FeaturedArtist - António Carlos Jobim, FeaturedArtist, ComposerLyricist - Creed Taylor, Producer"
    }
   ]
- }
+ },
+ "artists": [
+  {
+   "name": "Stan Getz",
+   "roles": [
+    "main-artist"
+   ]
+  },
+  {
+   "name": "João Gilberto",
+   "roles": [
+    "main-artist"
+   ]
+  }
+ ]
 }
 '''

@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 
 from salmon import cfg
 from salmon.common import RE_FEAT, parse_copyright, re_split
+from salmon.common.strings import comparable, names_no_artist
 from salmon.errors import ScrapeError
 from salmon.sources import QobuzBase
 from salmon.tagger.sources.base import MetadataMixin, ends_with_ep, strip_ep_suffix
@@ -105,6 +106,33 @@ def safe_get(d, keys, default=None):
 
     # Return default for None/empty values
     return result if result else default
+
+
+def _album_main_artists(soup) -> list[str]:
+    """Keep the album's principal artist first, followed by its other explicit main artists."""
+    names = [safe_get(soup, ["artist", "name"])]
+    names += [
+        artist.get("name") for artist in soup.get("artists") or [] if "main-artist" in (artist.get("roles") or [])
+    ]
+    return list(dict.fromkeys(name for name in names if isinstance(name, str) and name and not names_no_artist(name)))
+
+
+def _performer_credits(text: str, known: dict[str, str]):
+    """Split the roles after each name, preserving a known artist's commas and spelling."""
+    for segment in text.split(" - "):
+        parts = [part.strip() for part in segment.split(",")]
+        if len(parts) < 2:
+            continue
+        split = next((i for i in range(len(parts) - 1, 0, -1) if comparable(", ".join(parts[:i])) in known), 1)
+        name = ", ".join(parts[:split])
+        yield known.get(comparable(name), name), parts[split:]
+
+
+def _track_main_names(performer, credits, mains):
+    credited = {comparable(name) for name, roles in credits if "MainArtist" in roles and "FeaturedArtist" not in roles}
+    if performer:
+        credited.add(comparable(performer))
+    return credited & mains.keys()
 
 
 _RELEASED_ON = re.compile(r"Released on\s+(\d{1,2})/(\d{1,2})/(\d{2,4})", re.IGNORECASE)
@@ -259,7 +287,7 @@ class Scraper(QobuzBase, MetadataMixin):
             return await self._fetch_public_page(rls_id)
 
         try:
-            response = await self.get_json(self.release_format.format(rls_id=rls_id), headers=self.headers)
+            response = await super().fetch_data(url, params=params, rls_id=rls_id)
         except Exception as err:
             raise ScrapeError(f"Failed to fetch data from Qobuz API: {str(err)}") from err
 
@@ -355,8 +383,7 @@ class Scraper(QobuzBase, MetadataMixin):
         """Parse track information from the API response."""
         tracks = defaultdict(dict)
 
-        # Get main artist from release
-        main_artist = safe_get(soup, ["artist", "name"])
+        main_artists = _album_main_artists(soup)
 
         # Get any featured artists at the release level
         featured_artists = []
@@ -366,7 +393,7 @@ class Scraper(QobuzBase, MetadataMixin):
                 artist_name = artist_data.get("name")
                 roles = artist_data.get("roles", [])
                 # Check for any variation of featured artist role
-                if artist_name and artist_name != main_artist and any("feat" in role.lower() for role in roles):
+                if artist_name and artist_name not in main_artists and any("feat" in role.lower() for role in roles):
                     featured_artists.append(artist_name)
 
         track_items = safe_get(soup, ["tracks", "items"], [])
@@ -378,7 +405,7 @@ class Scraper(QobuzBase, MetadataMixin):
             track_number = str(track.get("track_number", 1))
 
             # Collect artists with their roles
-            artists = self._collect_track_artists(track, main_artist, featured_artists)
+            artists = self._collect_track_artists(track, main_artists, featured_artists)
 
             # Parse track title with version
             title = track.get("title", "")
@@ -392,6 +419,7 @@ class Scraper(QobuzBase, MetadataMixin):
                 artists=artists,
                 title=title,
                 isrc=track.get("isrc"),
+                duration=track.get("duration"),
                 explicit=track.get("parental_warning", False),
             )
 
@@ -510,74 +538,43 @@ class Scraper(QobuzBase, MetadataMixin):
     # Helper Methods
     # --------------------------------------------------------------------------
 
-    def _collect_track_artists(self, track, main_artist, featured_artists):
-        """
-        Helper method to collect artists with their roles for a track.
-
-        This method applies several strategies to identify and categorize artists:
-        1. Uses the track's performer as main artist when available
-        2. Falls back to the release's main artist if no track performer
-        3. Parses the performers string for additional artists and their roles
-        4. Adds any release-level featured artists not already present
-        5. Extracts featured artists from the track title using RE_FEAT
-
-        Args:
-            track (dict): Track data from Qobuz API
-            main_artist (str): Main artist name from the release
-            featured_artists (list): Featured artists identified at release level
-
-        Returns:
-            list: List of tuples (artist_name, role) where role is 'main' or 'guest'
-        """
+    def _collect_track_artists(self, track, main_artists, featured_artists):
+        """Keep explicit album mains as main when credited on this track, using the album's spelling."""
         artists = []
         seen_artists = set()
-        # Track artists we've already processed
-
-        # 1. Add release's main artist if available
-        artists.append((main_artist, "main"))
-        seen_artists.add(main_artist)
-
-        # 2. Add track's performer as guest artist if different from main artist
+        mains = {comparable(name): name for name in main_artists}
+        known = dict(mains)
         performer = safe_get(track, ["performer", "name"])
-        if performer and performer != main_artist:
-            artists.append((performer, "guest"))
-            seen_artists.add(performer)
+        if performer:
+            known.setdefault(comparable(performer), performer)
 
-        # 3. Parse the performers string for additional artists
-        if "performers" in track:
-            performers_str = track["performers"]
+        def add(name, role):
+            key = comparable(name)
+            if key and key not in seen_artists:
+                artists.append((known.get(key, name), role))
+                seen_artists.add(key)
 
-            # Split by segments first
-            for artist_segment in performers_str.split(" - "):
-                parts = artist_segment.split(", ")
-                if len(parts) >= 2:
-                    artist_name = parts[0].strip()
-                    roles = parts[1:]
+        credits = list(_performer_credits(track.get("performers") or "", known))
+        track_mains = _track_main_names(performer, credits, mains)
+        # An explicitly credited co-main can perform a track without the album's first artist.
+        # Without such evidence, keep the primary as fallback for sparse credits.
+        for name in main_artists if track_mains else main_artists[:1]:
+            if not track_mains or comparable(name) in track_mains:
+                add(name, "main")
+        if performer:
+            add(performer, "main" if not mains or comparable(performer) in mains else "guest")
 
-                    # Skip artists we already have
-                    if artist_name in seen_artists:
-                        continue
+        for name, roles in credits:
+            if "FeaturedArtist" in roles:
+                add(name, "guest")
+            elif "MainArtist" in roles:
+                add(name, "main" if not mains or comparable(name) in mains else "guest")
 
-                    # Check roles: prioritize FeaturedArtist over other roles
-                    # MainArtists here are actually guests ones (real mains are release ones, or
-                    # if none, performers ones)
-                    if any(role in roles for role in ["FeaturedArtist", "MainArtist"]):
-                        artists.append((artist_name, "guest"))
-                        seen_artists.add(artist_name)
-
-        # 4. Add any release-level featured artists not already added
         for guest in featured_artists:
-            if guest not in seen_artists:
-                artists.append((guest, "guest"))
-                seen_artists.add(guest)
+            add(guest, "guest")
 
-        # 5. Check for "feat." in title and add those artists as guests
         title = track.get("title", "")
         if feat := RE_FEAT.search(title):
             for artist in re_split(feat[1]):
-                guest_name = unescape(artist)
-                if guest_name not in seen_artists:
-                    artists.append((guest_name, "guest"))
-                    seen_artists.add(guest_name)
-
+                add(unescape(artist), "guest")
         return artists

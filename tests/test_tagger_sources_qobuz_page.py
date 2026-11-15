@@ -177,7 +177,7 @@ def test_each_track_credits_only_its_own_artists_when_the_header_joins_two() -> 
     assert data["artist"] == {"name": "Gorgon City"}
     tracks = anyio.run(Scraper().parse_tracks, data)["1"]
     assert [tracks[n]["artists"] for n in ("1", "2", "3")] == [
-        [("Gorgon City", "main"), ("Jem Cooke", "guest")],
+        [("Gorgon City", "main"), ("Jem Cooke", "main")],
         [("Gorgon City", "main")],
         [("Gorgon City", "main"), ("Taet", "guest")],
     ]

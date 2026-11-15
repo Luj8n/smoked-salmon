@@ -32,7 +32,44 @@ ROLES = {
     "Featuring [Vocals]": "guest",
     "Remix": "remixer",
     "Arranged By": "arranger",
+    "Conductor": "conductor",
+    "Orchestra": "main",
 }
+
+# Explicit performance credits commonly used on classical releases. Do not infer performance
+# from unrelated credits such as production, liner notes, or orchestration.
+_PERFORMANCE_ROLES = {
+    "Piano",
+    "Violin",
+    "Viola",
+    "Cello",
+    "Double Bass",
+    "Flute",
+    "Oboe",
+    "Clarinet",
+    "Bassoon",
+    "French Horn",
+    "Trumpet",
+    "Trombone",
+    "Tuba",
+    "Harp",
+    "Guitar",
+    "Organ",
+    "Harpsichord",
+    "Percussion",
+    "Vocals",
+    "Voice",
+    "Soloist",
+}
+
+
+def _performs(credit):
+    return any(role.split("[", 1)[0].strip() in _PERFORMANCE_ROLES for role in credit["role"].split(","))
+
+
+def _performer_names(credits):
+    return {sanitize_artist_name(a["name"]) for a in credits if _performs(a)}
+
 
 RELEASE_TYPES = {
     "Album": "Album",
@@ -57,15 +94,71 @@ def _clean_discogs_position(position: str, default_disc: int) -> tuple[str, str]
     pos = str(position).strip().upper()
 
     # Handles "1-01", "2-15" multi-disc format
-    match = re.match(r"^(\d+)-(\d+)$", pos)
+    match = re.match(r"^(\d+)-(\d+)([A-Z]*)$", pos)
     if match:
-        return str(int(match[1])), str(int(match[2]))
+        return str(int(match[1])), str(int(match[2])) + match[3]
 
     # Handles "01", "02", "1"
     if pos.isdecimal():
         return str(default_disc), str(int(pos))
 
     return str(default_disc), pos
+
+
+def _track_entries(entries):
+    """Flatten index headings, carrying the work's title and credits into its playable children."""
+    for entry in entries:
+        if entry["type_"] != "index":
+            yield entry
+            continue
+        for child in _track_entries(entry.get("sub_tracks", [])):
+            child = {**child, "title": f"{entry['title'].strip()}: {child['title'].strip()}"}
+            if "artists" not in child and "artists" in entry:
+                child["artists"] = entry["artists"]
+            child["extraartists"] = [*entry.get("extraartists", []), *child.get("extraartists", [])]
+            yield child
+
+
+def _credit_applies(scope: str, position: str, positions: list[str]) -> bool:
+    """Discogs credits either every track, named positions, or inclusive '1 to 4' ranges."""
+    if not scope.strip():
+        return True
+    for part in scope.upper().split(","):
+        part = part.strip()
+        if part == position:
+            return True
+        ends = part.split(" TO ")
+        if (
+            len(ends) == 2
+            and all(end in positions for end in ends)
+            and position in positions
+            and positions.index(ends[0]) <= positions.index(position) <= positions.index(ends[1])
+        ):
+            return True
+    return False
+
+
+def _classical_track(soup, track, positions, composers):
+    """Apply explicit classical roles, including a work's composer, without turning composers into performers."""
+    position = track.get("position", "").strip().upper()
+    extra = [
+        art
+        for art in soup.get("extraartists", [])
+        if (
+            any(role.strip() in {"Composed By", "Conductor", "Orchestra"} for role in art["role"].split(","))
+            or _performs(art)
+        )
+        and _credit_applies(art.get("tracks", ""), position, positions)
+    ]
+    extra.extend(track.get("extraartists", []))
+    composers_only = composers - _performer_names(extra)
+    album_artists = [a for a in soup["artists"] if sanitize_artist_name(a["name"]) not in composers_only]
+    credits = track.get("artists", album_artists)
+    performers = [a for a in credits if sanitize_artist_name(a["name"]) not in composers_only]
+    # An index can credit the work's composer alone; its movements still have the release's performers.
+    if credits and not performers:
+        performers = album_artists
+    return {**track, "artists": performers, "extraartists": extra}
 
 
 class Scraper(DiscogsBase, MetadataMixin):
@@ -114,7 +207,15 @@ class Scraper(DiscogsBase, MetadataMixin):
     async def parse_tracks(self, soup):
         tracks = defaultdict(dict)
         cur_disc = 1
-        for track in soup["tracklist"]:
+        entries = list(_track_entries(soup["tracklist"]))
+        classical = "Classical" in soup.get("genres", [])
+        positions = [t.get("position", "").strip().upper() for t in entries if t["type_"] == "track"]
+        composers = {
+            sanitize_artist_name(a["name"])
+            for a in [*soup.get("extraartists", []), *(a for t in entries for a in t.get("extraartists", []))]
+            if "Composed By" in [role.strip() for role in a["role"].split(",")]
+        }
+        for track in entries:
             if track["type_"] == "heading" and tracks:
                 cur_disc += 1
             elif track["type_"] == "track":
@@ -122,7 +223,8 @@ class Scraper(DiscogsBase, MetadataMixin):
                 disc_str, track_num = _clean_discogs_position(raw_pos, cur_disc)
                 disc_num = int(disc_str)
 
-                artists, variations = parse_credits(soup["artists"], track)
+                credited = _classical_track(soup, track, positions, composers) if classical else track
+                artists, variations = parse_credits(soup["artists"], credited)
                 tracks[disc_str][track_num] = self.generate_track(
                     trackno=track_num,
                     discno=disc_num,
@@ -171,6 +273,7 @@ def parse_credits(artist_soup, track):
     credits = track["artists"] if "artists" in track else [art for art in artist_soup if art["name"] != "Various"]
     artists, variations = _credited_artists(credits)
     if "extraartists" in track:
+        performers = _performer_names(track["extraartists"])
         for art in track["extraartists"]:
             for role in art["role"].split(","):
                 role = role.strip()
@@ -179,8 +282,13 @@ def parse_credits(artist_soup, track):
                     artists.append(credit)
                     _note_variation(variations, credit, art)
         for name, role in artists:
-            # An artist who also arranged the track stays its main artist.
-            if role != "main" and (name, "main") in artists and (name, "arranger") not in artists:
+            # Production and arranging credits do not replace a performing credit.
+            if (
+                role not in {"main", "producer", "arranger"}
+                and (name, "main") in artists
+                and (name, "arranger") not in artists
+                and not (name in performers and (name, "composer") in artists)
+            ):
                 artists.remove((name, "main"))
     return artists, variations
 
@@ -191,6 +299,8 @@ def _credited_artists(credits):
     variations = []
     role = "main"
     for art in credits:
+        if art["name"] == "No Artist":
+            continue
         credit = (sanitize_artist_name(art["name"]), role)
         artists.append(credit)
         _note_variation(variations, credit, art)

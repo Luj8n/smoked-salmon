@@ -37,7 +37,7 @@ release = ["Thelonious Monk (main)", "John Coltrane (guest)"]
 tracks = 6
 
 [today.merge]
-release = ["Thelonious Monk (main)", "John Coltrane (main)"]
+release = ["Thelonious Monk (main)", "John Coltrane (guest)"]
 tracks = 7
 
 # The files' tags.

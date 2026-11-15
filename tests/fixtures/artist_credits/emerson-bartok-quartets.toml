@@ -1,7 +1,8 @@
 album = "Emerson String Quartet, Bartók: The String Quartets"
 why = "A string quartet as the performer, the composer in the title: the composer must not become the main artist."
 edition = "Qobuz 0002894236572 is the same UPC less its check digit, the same 23 tracks."
-known_wrong = ["Discogs parse: 0 tracks, no artists (index tracks)", "MusicBrainz parse and the merge: the four players made main beside the quartet"]
+known_wrong = ["MusicBrainz parse and merge: the four players made main beside the quartet"]
+verified_stages = ["discogs"]
 files_from = "deezer"
 
 [sources]
@@ -25,8 +26,8 @@ release = ["Emerson String Quartet (main)", "David Finckel (main)", "Eugene Druc
 tracks = 23
 
 [today.discogs]
-release = []
-tracks = 0
+release = ["Emerson String Quartet (main)", "Béla Bartók (composer)"]
+tracks = 25
 
 [today.qobuz]
 release = ["Emerson String Quartet (main)"]
@@ -272,6 +273,7 @@ albumartist = ["Emerson String Quartet"]
 date = ["1988-09-07"]
 
 # What each store sent, trimmed to what salmon's parser reads.
+# discogs: nested track data restored from the same release API on 2026-11-15.
 [stores]
 deezer = '''
 {
@@ -710,28 +712,374 @@ discogs = '''
  ],
  "tracklist": [
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 1 Op. 7, Sz 40 (1908-1909)"
+   "title": "Streichquartett Nr. 1 Op. 7, Sz 40 (1908-1909)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "1-1",
+     "type_": "track",
+     "title": "1. Lento - Attacca:",
+     "duration": "9:16"
+    },
+    {
+     "position": "1-2",
+     "type_": "track",
+     "title": "2. Poco A Poco Accelerando All'Allegretto -",
+     "duration": "8:11"
+    },
+    {
+     "position": "1-3a",
+     "type_": "track",
+     "title": "Introduzione. Allegro - Attacca:",
+     "duration": "11:28"
+    },
+    {
+     "position": "1-3b",
+     "type_": "track",
+     "title": "3. Allegro Vivace",
+     "duration": ""
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 3, Sz 85 (1927)"
+   "title": "Streichquartett Nr. 3, Sz 85 (1927)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "1-4",
+     "type_": "track",
+     "title": "1. Prima Parte: Moderato - Attacca:",
+     "duration": "4:20"
+    },
+    {
+     "position": "1-5a",
+     "type_": "track",
+     "title": "2. Seconda Parte: Allegro - Attacca:",
+     "duration": "5:09"
+    },
+    {
+     "position": "1-5b",
+     "type_": "track",
+     "title": "Ricapitulazione Della Prima Parte: Moderato",
+     "duration": ""
+    },
+    {
+     "position": "1-6",
+     "type_": "track",
+     "title": "3. Coda: Allegro Molto",
+     "duration": "4:25"
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 5, Sz 102 (1934)"
+   "title": "Streichquartett Nr. 5, Sz 102 (1934)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "1-7",
+     "type_": "track",
+     "title": "1. Allegro",
+     "duration": "7:20"
+    },
+    {
+     "position": "1-8",
+     "type_": "track",
+     "title": "2. Adagio Molto",
+     "duration": "5:52"
+    },
+    {
+     "position": "1-9",
+     "type_": "track",
+     "title": "3. Scherzo. Alla Bulgarese",
+     "duration": "4:56"
+    },
+    {
+     "position": "1-10",
+     "type_": "track",
+     "title": "4. Andante",
+     "duration": "4:47"
+    },
+    {
+     "position": "1-11",
+     "type_": "track",
+     "title": "5. Finale. Allegro Vivace",
+     "duration": "6:12"
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 2 Op. 17, Sz 67 (1915-1917)"
+   "title": "Streichquartett Nr. 2 Op. 17, Sz 67 (1915-1917)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "2-1",
+     "type_": "track",
+     "title": "1. Moderato",
+     "duration": "10:11"
+    },
+    {
+     "position": "2-2",
+     "type_": "track",
+     "title": "2. Allegro Molto Capriccioso",
+     "duration": "7:19"
+    },
+    {
+     "position": "2-3",
+     "type_": "track",
+     "title": "3. Lento",
+     "duration": "9:18"
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 4, Sz 91 (1928)"
+   "title": "Streichquartett Nr. 4, Sz 91 (1928)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "2-4",
+     "type_": "track",
+     "title": "1. Allegro",
+     "duration": "5:38"
+    },
+    {
+     "position": "2-5",
+     "type_": "track",
+     "title": "2. Prestissimo, Con Sordino",
+     "duration": "2:47"
+    },
+    {
+     "position": "2-6",
+     "type_": "track",
+     "title": "3. Non Troppo Lento",
+     "duration": "5:12"
+    },
+    {
+     "position": "2-7",
+     "type_": "track",
+     "title": "4. Allegretto Pizzicato",
+     "duration": "2:41"
+    },
+    {
+     "position": "2-8",
+     "type_": "track",
+     "title": "5. Allegro Molto",
+     "duration": "5:05"
+    }
+   ]
   },
   {
+   "position": "",
    "type_": "index",
-   "title": "Streichquartett Nr. 6, Sz 114 (1939)"
+   "title": "Streichquartett Nr. 6, Sz 114 (1939)",
+   "duration": "",
+   "sub_tracks": [
+    {
+     "position": "2-9",
+     "type_": "track",
+     "title": "1. Mesto - Più Mosso, Pesante - Vivace",
+     "duration": "7:06"
+    },
+    {
+     "position": "2-10",
+     "type_": "track",
+     "title": "2. Mesto - Marcia",
+     "duration": "7:27"
+    },
+    {
+     "position": "2-11",
+     "type_": "track",
+     "title": "3. Mesto - Burletta",
+     "duration": "6:57"
+    },
+    {
+     "position": "2-12",
+     "type_": "track",
+     "title": "4. Mesto",
+     "duration": "6:21"
+    }
+   ]
+  }
+ ],
+ "artists": [
+  {
+   "name": "Béla Bartók",
+   "anv": "Bartók",
+   "join": ",",
+   "role": "",
+   "tracks": "",
+   "id": 304968
+  },
+  {
+   "name": "Emerson String Quartet",
+   "anv": "",
+   "join": "",
+   "role": "",
+   "tracks": "",
+   "id": 848555
+  }
+ ],
+ "extraartists": [
+  {
+   "name": "Hartmut Pfeiffer",
+   "anv": "",
+   "join": "",
+   "role": "Art Direction",
+   "tracks": "",
+   "id": 1827909
+  },
+  {
+   "name": "David Finckel",
+   "anv": "",
+   "join": "",
+   "role": "Cello",
+   "tracks": "",
+   "id": 848542
+  },
+  {
+   "name": "Béla Bartók",
+   "anv": "",
+   "join": "",
+   "role": "Composed By",
+   "tracks": "",
+   "id": 304968
+  },
+  {
+   "name": "Peter Laenger",
+   "anv": "",
+   "join": "",
+   "role": "Engineer [Balance]",
+   "tracks": "",
+   "id": 439842
+  },
+  {
+   "name": "Emerson String Quartet",
+   "anv": "",
+   "join": "",
+   "role": "Ensemble",
+   "tracks": "",
+   "id": 848555
+  },
+  {
+   "name": "Anthony Burton",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 1639177
+  },
+  {
+   "name": "Eugene Drucker",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 848539
+  },
+  {
+   "name": "Ludwig Finscher",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 1646057
+  },
+  {
+   "name": "Sergio Sablich",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 1639304
+  },
+  {
+   "name": "Yves Lenoir",
+   "anv": "",
+   "join": "",
+   "role": "Liner Notes",
+   "tracks": "",
+   "id": 2086118
+  },
+  {
+   "name": "Christian Steiner (6)",
+   "anv": "",
+   "join": "",
+   "role": "Photography By [Booklet]",
+   "tracks": "",
+   "id": 2234875
+  },
+  {
+   "name": "Annette Lederer",
+   "anv": "",
+   "join": "",
+   "role": "Photography By [Box Cover]",
+   "tracks": "",
+   "id": 2257292
+  },
+  {
+   "name": "Steven Paul",
+   "anv": "Dr. Steven Paul",
+   "join": "",
+   "role": "Producer",
+   "tracks": "",
+   "id": 836768
+  },
+  {
+   "name": "Wolf Erichson",
+   "anv": "",
+   "join": "",
+   "role": "Recording Supervisor",
+   "tracks": "",
+   "id": 898394
+  },
+  {
+   "name": "Lawrence Dutton",
+   "anv": "",
+   "join": "",
+   "role": "Viola",
+   "tracks": "",
+   "id": 848549
+  },
+  {
+   "name": "Eugene Drucker",
+   "anv": "",
+   "join": "",
+   "role": "Violin [1st]",
+   "tracks": "1-1 to 1-3, 1-7 to 1-11, 2-4 to 2-8",
+   "id": 848539
+  },
+  {
+   "name": "Philip Setzer",
+   "anv": "",
+   "join": "",
+   "role": "Violin [1st]",
+   "tracks": "1-4 to 1-6, 2-1 to 2-3, 2-9 to 2-12",
+   "id": 848538
+  },
+  {
+   "name": "Eugene Drucker",
+   "anv": "",
+   "join": "",
+   "role": "Violin [2nd]",
+   "tracks": "1-4 to 1-6, 2-1 to 2-3, 2-9 to 2-12",
+   "id": 848539
+  },
+  {
+   "name": "Philip Setzer",
+   "anv": "",
+   "join": "",
+   "role": "Violin [2nd]",
+   "tracks": "1-1 to 1-3, 1-7 to 1-11, 2-4",
+   "id": 848538
   }
  ]
 }

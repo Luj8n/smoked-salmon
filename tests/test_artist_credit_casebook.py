@@ -248,6 +248,8 @@ def test_today(case: Path, stage: str, monkeypatch: pytest.MonkeyPatch) -> None:
     shown = "\n".join(f"{key} = {json.dumps(value, ensure_ascii=False)}" for key, value in got.items())
     update = f"today changed: if the change is meant, set [today.{stage}] in {case.name} to:\n{shown}"
     assert got == want, update
+    if stage in record.get("verified_stages", []):
+        assert judge(record["right"], got) == [], f"{case.name}/{stage} regressed against its settled right"
 
 
 def test_each_case_records_exactly_the_stages_it_runs() -> None:
@@ -255,6 +257,7 @@ def test_each_case_records_exactly_the_stages_it_runs() -> None:
     for case in _cases():
         record = _record(case)
         assert set(record["today"]) == set(_stages(record)), case.name
+        assert set(record.get("verified_stages", [])) <= set(_stages(record)), case.name
 
 
 def test_a_name_holding_a_separator_is_judged_whole() -> None:

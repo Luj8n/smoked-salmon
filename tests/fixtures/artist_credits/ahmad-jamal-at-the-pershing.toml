@@ -21,7 +21,7 @@ release = ["Ahmad Jamal Trio (main)"]
 tracks = 8
 
 [today.musicbrainz]
-release = ["Ahmad Jamal (main)", "The Ahmad Jamal Trio (main)"]
+release = ["Ahmad Jamal (main)", "Ahmad Jamal Trio (main)"]
 tracks = 8
 
 [today.discogs]
@@ -33,7 +33,7 @@ release = ["Ahmad Jamal (main)", "Ahmad Jamal Trio (guest)"]
 tracks = 8
 
 [today.merge]
-release = ["Ahmad Jamal Trio (main)", "The Ahmad Jamal Trio (main)"]
+release = ["Ahmad Jamal Trio (main)"]
 tracks = 8
 
 

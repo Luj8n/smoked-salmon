@@ -83,6 +83,140 @@ def test_preferred_source_title_overrides_stale_local_album_title():
     assert combined["title"] == "Dirty & Funky EP"
 
 
+@pytest.mark.parametrize("replay_gain", [None, 0.0, -6.0])
+def test_replay_gain_does_not_change_a_tracks_title(replay_gain):
+    base = one_track([("Artist", "main")], "Selected Title")
+    source = one_track([("Artist", "main")], "Unrelated Title")
+    source["1"]["1"]["replay_gain"] = replay_gain
+
+    combined = combine_tracks(base, source, False)
+
+    assert combined["1"]["1"]["title"] == "Selected Title"
+    assert combined["1"]["1"]["replay_gain"] == replay_gain
+
+
+def test_preferred_track_title_replaces_local_title_and_survives_later_sources():
+    base, preferred, later = (make_metadata("Album") for _ in range(3))
+    base["tracks"]["1"]["1"]["title"] = "Stale Title"
+    preferred["tracks"]["1"]["1"]["title"] = "Selected Title"
+    later["tracks"]["1"]["1"]["title"] = "Different Title"
+
+    combined = combine_metadatas(("Deezer", preferred), ("Discogs", later), base=base)
+
+    assert combined["tracks"]["1"]["1"]["title"] == "Selected Title"
+
+
+def test_zero_replay_gain_is_an_existing_value_not_missing_metadata():
+    base = one_track([("Artist", "main")], "Song")
+    source = one_track([("Artist", "main")], "Song")
+    base["1"]["1"]["replay_gain"] = 0.0
+    source["1"]["1"]["replay_gain"] = -6.0
+
+    assert combine_tracks(base, source, False)["1"]["1"]["replay_gain"] == 0.0
+
+
+@pytest.mark.parametrize("role", ["guest", "remixer", "conductor", "composer"])
+def test_selected_source_corrects_roles_in_plain_file_artist_tags(role):
+    base = make_metadata("Album")
+    base["tracks"]["1"]["1"]["artists"] += [("Other", "main"), ("Unlisted", "main")]
+    selected = make_metadata("Album")
+    selected["tracks"]["1"]["1"]["artists"].append(("Other", role))
+    selected["url"] = "https://www.deezer.com/album/1"
+
+    combined = combine_metadatas(("Deezer", selected), base=base, source_url=selected["url"])
+
+    artists = combined["tracks"]["1"]["1"]["artists"]
+    assert ("Other", role) in artists
+    assert ("Other", "main") not in artists
+    assert ("Unlisted", "main") in artists
+
+
+def test_an_additional_source_does_not_reassign_the_selected_sources_artist_roles():
+    base = make_metadata("Album")
+    base["tracks"]["1"]["1"]["artists"].append(("Other", "main"))
+    selected = deepcopy(base)
+    selected["tracks"]["1"]["1"]["artists"][-1] = ("Other", "guest")
+    selected["url"] = "https://www.deezer.com/album/1"
+    additional = make_metadata("Album")
+    additional["tracks"]["1"]["1"]["artists"].append(("Other", "main"))
+    combined = combine_metadatas(("Deezer", selected), ("Tidal", additional), base=base, source_url=selected["url"])
+    artists = combined["tracks"]["1"]["1"]["artists"]
+    assert ("Other", "guest") in artists
+    assert ("Other", "main") not in artists
+
+
+def test_selected_source_roles_recognize_the_names_written_on_the_release():
+    base = make_metadata("Album")
+    base["tracks"]["1"]["1"]["artists"].append(("Jamm", "main"))
+    selected = make_metadata("Album")
+    track = selected["tracks"]["1"]["1"]
+    track["artists"].append(('Matt "Jam" Lamont', "remixer"))
+    track["artist_variations"] = [{"name": 'Matt "Jam" Lamont', "anv": "Jamm", "role": "remixer"}]
+    combined = combine_metadatas(("Discogs", selected), base=base, source_url="https://www.discogs.com/release/1")
+    assert combined["tracks"]["1"]["1"]["artists"] == [("Marius Acke", "main"), ("Jamm", "remixer")]
+
+
+def test_selected_source_can_credit_a_main_artist_as_their_own_remixer():
+    base = make_metadata("Album")
+    selected = make_metadata("Album")
+    selected["tracks"]["1"]["1"]["artists"].append(("Marius Acke", "remixer"))
+    combined = combine_metadatas(("Deezer", selected), base=base, source_url="https://www.deezer.com/album/1")
+    assert combined["tracks"]["1"]["1"]["artists"] == [("Marius Acke", "main"), ("Marius Acke", "remixer")]
+
+
+@pytest.mark.parametrize("role", ["guest", "remixer", "composer", "conductor"])
+def test_later_source_resolves_a_local_role_when_the_preferred_source_omits_the_artist(role):
+    base, preferred, later = (make_metadata("Album") for _ in range(3))
+    base["tracks"]["1"]["1"]["artists"].append(("Other Artist", "main"))
+    later["tracks"]["1"]["1"]["artists"].append(("Other Artist", role))
+
+    combined = combine_metadatas(("Deezer", preferred), ("Discogs", later), base=base)
+
+    assert combined["tracks"]["1"]["1"]["artists"] == [("Marius Acke", "main"), ("Other Artist", role)]
+
+
+def test_later_source_resolves_a_local_alias_role_when_the_preferred_source_omits_the_artist():
+    base, preferred, later = (make_metadata("Album") for _ in range(3))
+    base["tracks"]["1"]["1"]["artists"].append(("Jamm", "main"))
+    later["tracks"]["1"]["1"].update(
+        artists=[("Marius Acke", "main"), ('Matt "Jam" Lamont', "remixer")],
+        artist_variations=[{"name": 'Matt "Jam" Lamont', "anv": "Jamm", "role": "remixer"}],
+    )
+
+    combined = combine_metadatas(("Deezer", preferred), ("Discogs", later), base=base)
+
+    assert combined["tracks"]["1"]["1"]["artists"] == [("Marius Acke", "main"), ("Jamm", "remixer")]
+
+
+@pytest.mark.parametrize("preferred_name", ["Alias", "Canonical"])
+def test_later_alias_cannot_override_an_existing_preferred_role(preferred_name):
+    base, preferred, later = (make_metadata("Album") for _ in range(3))
+    base["tracks"]["1"]["1"]["artists"].append(("Alias", "main"))
+    preferred["tracks"]["1"]["1"]["artists"].append((preferred_name, "guest"))
+    later["tracks"]["1"]["1"].update(
+        artists=[("Marius Acke", "main"), ("Canonical", "main")],
+        artist_variations=[{"name": "Canonical", "anv": "Alias", "role": "main"}],
+    )
+
+    combined = combine_metadatas(("Deezer", preferred), ("Discogs", later), base=base)
+
+    credits = combined["tracks"]["1"]["1"]["artists"]
+    assert credits == [("Marius Acke", "main"), ("Alias", "guest")]
+
+
+def test_explicit_alias_deduplication_preserves_distinct_main_and_remixer_roles():
+    base, selected = (make_metadata("Album") for _ in range(2))
+    base["tracks"]["1"]["1"]["artists"] = [("Alias", "main"), ("Alias", "remixer")]
+    selected["tracks"]["1"]["1"].update(
+        artists=[("Canonical", "main"), ("Canonical", "remixer")],
+        artist_variations=[{"name": "Canonical", "anv": "Alias", "role": role} for role in ("main", "remixer")],
+    )
+
+    combined = combine_metadatas(("Discogs", selected), base=base)
+
+    assert combined["tracks"]["1"]["1"]["artists"] == [("Alias", "main"), ("Alias", "remixer")]
+
+
 def test_combine_tracks_keeps_all_tracks_when_updating_track_numbers():
     ordered_tracks = [str(i) for i in range(1, 12)]
     base = make_tracks({"1": ["1", "10", "11", "2", "3", "4", "5", "6", "7", "8", "9"]}, isrc_prefix=None)
@@ -611,6 +745,18 @@ def test_a_source_group_year_int_refuses_is_passed_over():
     combined = combine_metadatas(("MusicBrainz", source), base=base)
 
     assert combined["group_year"] == "2020"
+
+
+def test_filling_an_edition_date_does_not_replace_the_original_release_year():
+    base, source = make_metadata("Album"), make_metadata("Album")
+    base.update(group_year="1981", year="1981", date=None)
+    source.update(group_year="2020", year="2020", date="2020-01-01")
+
+    combined = combine_metadatas(("Qobuz", source), base=base)
+
+    assert combined["group_year"] == "1981"
+    assert combined["year"] == "2020"
+    assert combined["date"] == "2020-01-01"
 
 
 def test_a_dated_source_group_year_int_refuses_is_passed_over():

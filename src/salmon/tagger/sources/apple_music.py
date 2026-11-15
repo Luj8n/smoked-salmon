@@ -175,7 +175,7 @@ class Scraper(AppleMusicBase, MetadataMixin):
                         if (guest, "guest") not in artists:
                             artists.append((guest, "guest"))
 
-                tracks[str(disc_num)][track_num] = self.generate_track(
+                tracks[str(disc_num)][str(track_num)] = self.generate_track(
                     trackno=track_num,
                     discno=disc_num,
                     artists=artists,

@@ -1,7 +1,8 @@
 album = "Miles Davis, Kind of Blue"
 why = "Personnel varying by track under one leader: Deezer's roles make the sextet '(feat. ...)' on every track, a different list per track; MusicBrainz and Discogs say Miles Davis alone."
 edition = "Columbia 1997 remaster as sold digitally, 5 tracks (Deezer 1441464 = MusicBrainz 4c8af71f by barcode); Discogs 6276183 is master 5460's main release (1959 CL 1355 LP)"
-known_wrong = ["Deezer parse: the sextet as '(feat. ...)' guests, a different list per track", "merge: the files' ARTIST (every player, as Deezer downloads write it) makes the whole sextet main"]
+known_wrong = ["Deezer parse: the sextet as '(feat. ...)' guests, a different list per track"]
+verified_stages = ["merge"]
 files_from = "deezer"
 
 [sources]
@@ -32,7 +33,7 @@ release = ["Miles Davis (main)"]
 tracks = 5
 
 [today.merge]
-release = ["Miles Davis (main)", "Bill Evans (main)", "John Coltrane (main)", "Cannonball Adderley (main)", "Wynton Kelly (main)", "Paul Chambers (main)"]
+release = ["Miles Davis (main)", "Bill Evans (guest)", "John Coltrane (guest)", "Cannonball Adderley (guest)", "Wynton Kelly (guest)", "Paul Chambers (guest)"]
 tracks = 5
 
 # The files' tags.

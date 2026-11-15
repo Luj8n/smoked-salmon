@@ -16,6 +16,7 @@ Each `<album>.toml` holds, in this order:
   conductor, any order), `not_main` (never main: a composer, a placeholder, a guest, a remixer), `remixers`, `name_forms` (other spellings of a right name). `open` is what is
   not settled yet. Names and roles are judged, never the separators that join them.
 - `known_wrong`: where today is wrong, in words.
+- `verified_stages`: corrected stages that must also satisfy `right`, even if someone updates their snapshots.
 - `[[track]]`: the files' tags, built from one store's data the way a download from that store is tagged (the
   comment above them names the store and the shape). Nobody's real files.
 - `[salmon_tags]` (optional): each track's ARTIST and TITLE as salmon itself writes them, the other tags as in
@@ -31,6 +32,7 @@ Each `<album>.toml` holds, in this order:
 2. Add the `[[track]]` tags and each store's response under `[stores]` as a `'''` string, trimmed: take out what the
    parser doesn't read and check the parse is unchanged. A full Discogs response can be tens of KB, so untrimmed
    cases would grow the repo quickly.
+   Keep nested tracklists, credited names and complete artist lists, even when today's parser ignores them.
 3. Run the test and paste each stage's value from its failure into `[today.<stage>]`.
 
 ## The scoreboard

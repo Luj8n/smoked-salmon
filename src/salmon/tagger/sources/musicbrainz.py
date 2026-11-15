@@ -24,9 +24,6 @@ RELEASE_TYPES = {
 }
 
 
-musicbrainzngs.set_useragent("salmon", "1.0", "noreply@salm.on")
-
-
 class Scraper(MusicBrainzBase, MetadataMixin):
     def parse_release_title(self, soup):
         return soup["title"]
@@ -111,7 +108,7 @@ class Scraper(MusicBrainzBase, MetadataMixin):
                         trackno=track["number"],
                         discno=disc["position"],
                         artists=parse_artists(track["recording"]["artist-credit"]),
-                        title=track["recording"]["title"],
+                        title=track.get("title") or track["recording"]["title"],
                     )
                 except (ValueError, IndexError) as e:
                     raise ScrapeError("Could not parse tracks.") from e
@@ -130,5 +127,5 @@ def parse_artists(artist_credits):
         if isinstance(artist, str) and RE_FEAT_JOIN.fullmatch(artist.strip()):
             is_guest = True
         elif isinstance(artist, dict):
-            artists.append((artist["artist"]["name"], "guest" if is_guest else "main"))
+            artists.append((artist.get("name") or artist["artist"]["name"], "guest" if is_guest else "main"))
     return artists
