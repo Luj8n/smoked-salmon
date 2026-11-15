@@ -843,8 +843,8 @@ def generate_file_name(tags, ext, multiple_artists, trackno_or=None, *, various=
         and cfg.upload.formatting.no_artist_in_filename_if_only_one_album_artist
         and not multiple_artists
     ):
-        keys.remove("artist")
         template = cfg.upload.formatting.one_album_artist_file_template
+        keys = [fn for _, fn, _, _ in Formatter().parse(template) if fn]
     if isinstance(tags, dict):
         template_keys: dict[str, str | int] = {}
         for k in keys:
