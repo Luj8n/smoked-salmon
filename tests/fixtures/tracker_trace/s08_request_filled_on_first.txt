@@ -55,7 +55,7 @@ POST /ajax.php action=upload [API key]
       [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   requestid: 901
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 77
@@ -89,7 +89,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 78
   categoryid: 1
@@ -122,7 +122,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 79
   categoryid: 1
@@ -180,7 +180,7 @@ POST /ajax.php action=upload [API key]
       [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 77
   categoryid: 1
@@ -213,7 +213,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 78
   categoryid: 1
@@ -246,7 +246,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 79
   categoryid: 1

@@ -771,7 +771,7 @@ def upload_footer() -> str:
     """The line every torrent description salmon writes ends with."""
     return (
         f"[hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon]"
-        f"[b]smoked-salmon[/b] v{get_version()}[/url]"
+        f"[b]smoked-salmon[/b] v{get_version()}[/url] (modified version)"
     )
 
 

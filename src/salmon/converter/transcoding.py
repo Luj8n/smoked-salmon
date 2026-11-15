@@ -685,5 +685,5 @@ def generate_transcode_description(url: str, bitrate: Bitrate) -> str:
     return (
         f"{transcode_note(url, bitrate)}"
         f"[hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon]"
-        f"[b]smoked-salmon[/b] v{get_version()}[/url]"
+        f"[b]smoked-salmon[/b] v{get_version()}[/url] (modified version)"
     )

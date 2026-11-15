@@ -48,7 +48,7 @@ POST /ajax.php action=upload [API key]
       [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 
 == OPS ==
 

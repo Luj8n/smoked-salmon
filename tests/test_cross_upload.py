@@ -1358,7 +1358,7 @@ def _header(source: str, target: str, uploader: str, source_url: str) -> str:
         f"[align=center][size=3][b]{source} → {target}[/b][/size]\n"
         f"[size=1]Original upload by {uploader} · [url={source_url}]View source torrent[/url]\n"
         "Cross-uploaded with [url=https://github.com/smokin-salmon/smoked-salmon]smoked-salmon[/url] "
-        f"v{get_version()}[/size][/align]"
+        f"v{get_version()} (modified version)[/size][/align]"
     )
 
 

@@ -49,7 +49,7 @@ POST /ajax.php action=upload [API key]
   release_desc: [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 GET /ajax.php action=torrentgroup id=55 [API key]
 POST /ajax.php action=upload [API key]
   file_input: meowmeow.torrent: infohash <infohash 2>, private True, announce flacsfor.me
@@ -68,7 +68,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /ajax.php action=upload [API key]
   file_input: meowmeow.torrent: infohash <infohash 3>, private True, announce flacsfor.me
   The torrent: Artist - Album (2020) [WEB FLAC] [V0], 2 file(s), 3.91 KiB, piece size 16 KiB, source RED
@@ -87,7 +87,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 
 == OPS ==
 GET /ajax.php action=index [API key]
@@ -126,7 +126,7 @@ POST /ajax.php action=upload [API key]
   release_desc: [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 77
   categoryid: 1
@@ -154,7 +154,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 78
   categoryid: 1
@@ -182,7 +182,7 @@ POST /ajax.php action=upload [API key]
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=77
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
 POST /reportsv2.php action=takereport [no auth] -> 302
   torrentid: 79
   categoryid: 1

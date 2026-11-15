@@ -706,7 +706,8 @@ def _source_header(torrent: dict[str, Any], source: "BaseGazelleApi", target: "B
     return (
         f"[align=center][size=3][b]{source.site_code} → {target.site_code}[/b][/size]\n"
         f"[size=1]Original upload by {uploader} · [url={source_url}]View source torrent[/url]\n"
-        f"Cross-uploaded with [url={UPSTREAM_URL}]smoked-salmon[/url] v{get_version()}[/size][/align]"
+        f"Cross-uploaded with [url={UPSTREAM_URL}]smoked-salmon[/url] v{get_version()}"
+        " (modified version)[/size][/align]"
     )
 
 

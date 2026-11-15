@@ -423,5 +423,5 @@ def generate_conversion_description(url: str, sample_rate: int | Sequence[int] |
         f"Encode Specifics: {bit_depth} bit {specifics} kHz\n"
         f"{conversion_note(url, sample_rate, bit_depth)}"
         f"[hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon]"
-        f"[b]smoked-salmon[/b] v{get_version()}[/url]"
+        f"[b]smoked-salmon[/b] v{get_version()}[/url] (modified version)"
     )

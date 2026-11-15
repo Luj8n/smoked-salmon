@@ -96,7 +96,7 @@ Dry run: not uploading to RED. It would send POST <RED>/ajax.php?action=upload w
       [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC], 3 file(s), 2.23 KiB, piece size 16 KiB, source RED
     01. one.flac  (1.11 KiB)
@@ -134,7 +134,7 @@ Dry run: not uploading to RED. It would send POST <RED>/ajax.php?action=upload w
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=<ID of the uploaded torrent>
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC] [320], 2 file(s), 5.86 KiB, piece size 16 KiB, source RED
     01. one.mp3  (2.93 KiB)
@@ -171,7 +171,7 @@ Dry run: not uploading to RED. It would send POST <RED>/ajax.php?action=upload w
   media: WEB
   release_desc: [b]Source:[/b] <RED>/torrents.php?torrentid=<ID of the uploaded torrent>
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC] [V0], 2 file(s), 3.91 KiB, piece size 16 KiB, source RED
     01. one.mp3  (1.95 KiB)
@@ -233,7 +233,7 @@ Dry run: not uploading to OPS. It would send POST <OPS>/ajax.php?action=upload w
       [img]https://i.ibb.co/hPnL0dT/cdq.png[/img] [b]16 bit [color=#2E86C1]44.1[/color] kHz[/b]
       Released on [b]2020-01-01[/b]
       [b]Source:[/b] [pad=0|3][url=https://store.test/album/1][img]https://i.ibb.co/jd8Ysrm/bandcamp.png[/img] Bandcamp[/url][/pad]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC], 3 file(s), 2.23 KiB, piece size 16 KiB, source OPS
     01. one.flac  (1.11 KiB)
@@ -271,7 +271,7 @@ Dry run: not uploading to OPS. It would send POST <OPS>/ajax.php?action=upload w
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=<ID of the uploaded torrent>
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -h -b 320 --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC] [320], 2 file(s), 5.86 KiB, piece size 16 KiB, source OPS
     01. one.mp3  (2.93 KiB)
@@ -308,7 +308,7 @@ Dry run: not uploading to OPS. It would send POST <OPS>/ajax.php?action=upload w
   media: WEB
   release_desc: [b]Source:[/b] <OPS>/torrents.php?torrentid=<ID of the uploaded torrent>
       [b]Transcode process:[/b] [code]flac -Vdsc -- input.flac | lame -S -V 0 --vbr-new --ignore-tag-errors - output.mp3[/code]
-      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url]
+      [hr]Uploaded with [url=https://github.com/smokin-salmon/smoked-salmon][b]smoked-salmon[/b] v<version>[/url] (modified version)
   auth: [REDACTED]
   The torrent: Artist - Album (2020) [WEB FLAC] [V0], 2 file(s), 3.91 KiB, piece size 16 KiB, source OPS
     01. one.mp3  (1.95 KiB)

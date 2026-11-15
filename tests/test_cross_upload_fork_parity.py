@@ -52,6 +52,7 @@ def _upstream_credit_no_tracker_links_and_no_footer(value: str, _sample: str) ->
     header, _, description = value.partition("[/align]\n\n")
     credit = (
         f"Cross-uploaded with [url=https://github.com/smokin-salmon/smoked-salmon]smoked-salmon[/url] v{get_version()}"
+        " (modified version)"
     )
     description = description.removesuffix(FORK_FOOTER)
     parts = (
