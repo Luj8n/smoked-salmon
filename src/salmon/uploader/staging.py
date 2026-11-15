@@ -43,6 +43,7 @@ def staged_source(path: str, scratch: bool) -> Iterator[tuple[str, str | None]]:
     if not scratch and refusal is None:
         yield path, None
         return
+    _refuse_copy_inside_source(path, os.path.join(cfg.directory.download_directory, STAGING_DIR))
     scratch_dir = _new_scratch_dir()
     try:
         # A scratch copy (--skip-flac-upload, --dry-run) and every folder made from it go when the run ends.
@@ -80,6 +81,7 @@ def _new_scratch_dir() -> str:
 
 def _copy_into(path: str, into: str, scratch: bool, refusal: str | None) -> str:
     """Copy the album folder into `into` and return the copy's path; `refusal` is why it must not be rewritten."""
+    _refuse_copy_inside_source(path, into)
     dest = os.path.join(into, os.path.basename(path.rstrip(os.sep)))
     if not scratch and refusal is not None:
         why = f"{refusal[0].upper()}{refusal[1:]}, so salmon works on a copy and never modifies the album."
@@ -111,6 +113,14 @@ def _copy_into(path: str, into: str, scratch: bool, refusal: str | None) -> str:
     with dryrun.writing_into(into):  # A dry run writes the record only into its run directory.
         carry_conversion(path, dest)
     return dest
+
+
+def _refuse_copy_inside_source(source: str, destination: str) -> None:
+    if is_within(os.path.realpath(destination), os.path.realpath(source)):
+        raise UploadError(
+            f"Cannot stage an album inside its source folder {source}. "
+            "Set download_directory outside the album, or select one album within the downloads folder."
+        )
 
 
 def _raise(error: OSError) -> None:

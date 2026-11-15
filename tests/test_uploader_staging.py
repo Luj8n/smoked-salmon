@@ -38,6 +38,25 @@ def test_without_scratch_the_upload_works_on_the_source(downloads, source) -> No
     assert os.listdir(downloads) == []
 
 
+@pytest.mark.parametrize("location", ["same", "child", "symlink"])
+def test_staging_refuses_to_create_its_copy_inside_the_source(monkeypatch, source, tmp_path, location):
+    download = source if location == "same" else source / "downloads"
+    download.mkdir(exist_ok=True)
+    if location == "symlink":
+        link = tmp_path / "download-link"
+        link.symlink_to(download, target_is_directory=True)
+        download = link
+    monkeypatch.setattr(staging.cfg.directory, "download_directory", str(download))
+    calls = []
+    monkeypatch.setattr(staging.shutil, "copytree", lambda *a, **k: calls.append(a))
+
+    with pytest.raises(UploadError, match="inside.*source"), staging.staged_source(str(source), scratch=True):
+        pytest.fail("Cannot stage a source inside itself")
+
+    assert calls == []
+    assert not (download / staging.STAGING_DIR).exists()
+
+
 def test_the_scratch_copy_is_a_real_copy_in_a_run_directory_removed_on_success(downloads, source, capsys) -> None:
     before = _files(source)
 
