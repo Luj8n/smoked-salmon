@@ -1,11 +1,8 @@
 import re
 
-import asyncclick as click
 from bs4 import BeautifulSoup
 
-from salmon import cfg, interaction
-from salmon.common import UploadFiles
-from salmon.constants import ARTIST_IMPORTANCES
+from salmon import cfg
 from salmon.errors import (
     RequestError,
 )
@@ -21,9 +18,6 @@ class OpsApi(BaseGazelleApi):
         self.base_url = "https://orpheus.network"
         self.tracker_url = "https://home.opsfet.ch"
         self.site_string = "OPS"
-
-        self._split_prompted = False
-        self._use_split = False
 
         if cfg.tracker.ops:
             ops_cfg = cfg.tracker.ops
@@ -48,7 +42,7 @@ class OpsApi(BaseGazelleApi):
             "Single": 9,
             "Demo": 10,
             "Live album": 11,
-            "Split": 12,
+            "Split": 12,  # Recognize existing OPS groups when cross-uploading; never selected automatically.
             "Remix": 13,
             "Bootleg": 14,
             "Interview": 15,
@@ -57,51 +51,6 @@ class OpsApi(BaseGazelleApi):
             "Concert Recording": 18,
             "Unknown": 21,
         }
-
-    async def upload(self, data: dict, files: UploadFiles) -> tuple[int, int]:
-        """Upload torrent, prompting once to set release type to Split for multi-artist releases.
-
-        If the upload is for a new group (no 'groupid' in data: a cross-upload sends
-        'releasetype' into an existing group too) and two or more main artists are listed,
-        the user is asked once whether to set the release type to Split (12). Guest-only
-        additions should not trigger this prompt. The answer is cached for subsequent
-        uploads into a new group in the same session; an existing group keeps its type.
-
-        Args:
-            data: Upload form data.
-            files: UploadFiles containing files to upload.
-
-        Returns:
-            Tuple of (torrent_id, group_id).
-        """
-        main_artist_count = sum(
-            1
-            for importance in data.get("importance[]", [])
-            if str(importance).strip() == str(ARTIST_IMPORTANCES["main"])
-        )
-        new_group = "releasetype" in data and "groupid" not in data
-        if new_group and main_artist_count >= 2 and not self._split_prompted:
-            self._use_split = await interaction.confirm(
-                click.style(
-                    f"\nThis release has {main_artist_count} main artists. "
-                    "OPS has a 'Split' release type:\n\n"
-                    "An album or EP that includes tracks by two or more separate artists. "
-                    "Unlike a compilation or collaboration, a split generally includes several tracks by each artist. "
-                    "Also unlike a compilation, a split is made up of new material or new performances, "
-                    "not re-packaged tracks from previous albums or singles.\n"
-                    "Split albums and EPs often include the word 'split' in the title or on the packaging. "
-                    "If you aren't sure if an album is a split, check Discogs, MusicBrainz or another reputable "
-                    "source before uploading.\n\n"
-                    "Do you want to set the release type to Split?",
-                    fg="magenta",
-                    bold=True,
-                ),
-                default=False,
-            )
-            self._split_prompted = True
-
-        upload_data = {**data, "releasetype": self.release_types["Split"]} if self._use_split and new_group else data
-        return await super().upload(upload_data, files)
 
     def parse_most_recent_torrent_and_group_id_from_group_page(self, text: str) -> tuple[int, int]:
         """

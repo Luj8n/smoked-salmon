@@ -11,88 +11,34 @@ from salmon.trackers.base import BaseGazelleApi, HttpResponse
 from salmon.trackers.ops import OpsApi
 
 
-def _split_answer(monkeypatch, answer: bool) -> tuple[list[str], list[dict]]:
-    """The Split questions asked, and the forms sent, with each question answered `answer`."""
-    asked: list[str] = []
-    sent: list[dict] = []
+@pytest.mark.parametrize("release_type", ["Album", "EP", "Single", "Compilation", "DJ Mix"])
+@pytest.mark.parametrize("group_id", [None, 5])
+def test_ops_keeps_the_selected_type_without_a_split_question(monkeypatch, release_type, group_id):
+    tracker = OpsApi()
+    sent = []
 
-    async def fake_confirm(text, *_args, **_kwargs):
-        asked.append(text)
-        return answer
+    async def unexpected_question(*args, **kwargs):
+        pytest.fail("OPS must use the normal release type without a Split question")
 
     async def fake_upload(self, data, files):
-        sent.append(data)
+        sent.append(data.copy())
         return 123, 456
 
-    # Patched where OPS asks, whichever way the question is answered (the CLI's click.confirm, or the web's card).
-    monkeypatch.setattr("salmon.trackers.ops.interaction.confirm", fake_confirm)
+    monkeypatch.setattr("salmon.interaction.confirm", unexpected_question)
     monkeypatch.setattr(BaseGazelleApi, "upload", fake_upload)
-    return asked, sent
+    data = {
+        "releasetype": tracker.release_types[release_type],
+        "artists[]": ["A", "B"],
+        "importance[]": [1, 1],
+    }
+    if group_id is not None:
+        data["groupid"] = group_id
 
-
-def test_ops_split_prompt_ignores_guest_only_second_artist(monkeypatch) -> None:
-    tracker = OpsApi()
-    asked, _sent = _split_answer(monkeypatch, False)
-
-    result = anyio.run(
-        tracker.upload,
-        {
-            "releasetype": tracker.release_types["Single"],
-            "artists[]": ["Anna Zak", "Itay Galo"],
-            "importance[]": [1, 2],
-        },
-        UploadFiles(torrent_data=b"torrent"),
-    )
+    result = anyio.run(tracker.upload, data, UploadFiles(torrent_data=b"torrent"))
 
     assert result == (123, 456)
-    assert asked == []
-
-
-def _form(tracker: OpsApi, **extra) -> dict:
-    return {"releasetype": tracker.release_types["Album"], "artists[]": ["A", "B"], "importance[]": [1, 1], **extra}
-
-
-def test_ops_asks_about_split_for_a_new_group_with_two_main_artists(monkeypatch) -> None:
-    tracker = OpsApi()
-    asked, sent = _split_answer(monkeypatch, True)
-
-    anyio.run(tracker.upload, _form(tracker), UploadFiles(torrent_data=b"torrent"))
-
-    assert len(asked) == 1
-    assert sent[0]["releasetype"] == tracker.release_types["Split"]
-
-
-def test_ops_doesnt_ask_about_split_for_an_upload_into_an_existing_group(monkeypatch) -> None:
-    # A cross-upload sends the group's form, release type included, with the group's id (#910).
-    tracker = OpsApi()
-    asked, sent = _split_answer(monkeypatch, True)
-
-    anyio.run(tracker.upload, _form(tracker, groupid=5), UploadFiles(torrent_data=b"torrent"))
-
-    assert asked == []
-    assert sent[0]["releasetype"] == tracker.release_types["Album"]
-
-
-def test_a_split_answer_for_a_new_group_leaves_a_later_existing_groups_type(monkeypatch) -> None:
-    tracker = OpsApi()
-    _asked, sent = _split_answer(monkeypatch, True)
-
-    anyio.run(tracker.upload, _form(tracker), UploadFiles(torrent_data=b"torrent"))
-    anyio.run(tracker.upload, _form(tracker, groupid=5), UploadFiles(torrent_data=b"torrent"))
-
-    assert sent[0]["releasetype"] == tracker.release_types["Split"]
-    assert sent[1]["releasetype"] == tracker.release_types["Album"]
-
-
-def test_a_split_answer_for_a_new_group_is_kept_for_a_later_new_group(monkeypatch) -> None:
-    tracker = OpsApi()
-    asked, sent = _split_answer(monkeypatch, True)
-
-    anyio.run(tracker.upload, _form(tracker), UploadFiles(torrent_data=b"torrent"))
-    anyio.run(tracker.upload, _form(tracker), UploadFiles(torrent_data=b"torrent"))
-
-    assert len(asked) == 1
-    assert [data["releasetype"] for data in sent] == [tracker.release_types["Split"]] * 2
+    assert sent == [data]
+    assert data["releasetype"] == tracker.release_types[release_type]
 
 
 def test_a_failed_lossy_master_report_shows_none_of_its_credentials(monkeypatch) -> None:
