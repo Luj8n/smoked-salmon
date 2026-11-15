@@ -17,7 +17,6 @@ from yarl import URL
 from salmon import cfg
 from salmon.config.validations import ProxyCfg, ProxyServicesCfg
 from salmon.errors import ScrapeError
-from salmon.search.bandcamp import Searcher
 from salmon.sources import bandcamp_challenge, base
 from salmon.tagger.sources.bandcamp import Scraper
 
@@ -145,8 +144,8 @@ def retries(monkeypatch: pytest.MonkeyPatch):
     return answer, calls
 
 
-def _fetch(url: str = ALBUM_URL, params: dict | None = None):
-    return anyio.run(Scraper().fetch_page, url, params)
+def _fetch(url: str = ALBUM_URL, params: dict | None = None, follow_redirects: bool = True):
+    return anyio.run(Scraper().fetch_page, url, params, None, follow_redirects)
 
 
 def _title(soup) -> str:
@@ -251,9 +250,9 @@ def test_the_search_is_asked_for_once_more_as_a_browser(first_fetches, retries) 
     first_fetches[0](CHALLENGE, {"https://bandcamp.com/search/?q=variations": "https://elsewhere.bandcamp.com/"})
     retries[0]((200, SEARCH))
 
-    _, releases = anyio.run(Searcher().search_releases, "variations", 5)
+    soup = _fetch("https://bandcamp.com/search/", params={"q": "variations"}, follow_redirects=False)
 
-    assert list(releases) == [("adventurousmusic.bandcamp.com", "album", "variations")]
+    assert soup.select(".heading a")[0].text == "Variations"
     retried = [(call["url"], call["params"]) for call in retries[1]]
     assert retried == [("https://bandcamp.com/search/?q=variations", None)]
 
@@ -297,7 +296,7 @@ def test_the_search_names_a_check_page_that_stays(first_fetches, retries) -> Non
     retries[0]((200, CHALLENGE))
 
     with pytest.raises(ScrapeError) as excinfo:
-        anyio.run(Searcher().search_releases, "variations", 5)
+        _fetch("https://bandcamp.com/search/", params={"q": "variations"})
 
     assert STILL in str(excinfo.value)
     assert len(retries[1]) == 1

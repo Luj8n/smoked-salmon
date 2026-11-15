@@ -11,16 +11,6 @@ from salmon import cfg
 from salmon.search import bandcamp, beatport, discogs, qobuz
 from salmon.search.base import SearchMixin
 
-BANDCAMP_PAGE = """
-<ul class="result-items"><li class="searchresult data-search"><div class="result-info">
-  <div class="heading"><a>Test Album</a></div>
-  <div class="subhead">by Test Artist</div>
-  <div class="length">3 tracks</div>
-  <div class="released">released </div>
-  <div class="itemurl"><a>https://testartist.bandcamp.com/album/test-album</a></div>
-</div></li></ul>
-"""
-
 
 def _answer(doc):
     async def get_json(*_args, **_kwargs):
@@ -41,14 +31,25 @@ def test_edition_joins_only_the_parts_present() -> None:
 
 
 def test_bandcamp_result_without_a_year_shows_no_none(monkeypatch) -> None:
-    async def fetch_page(*_args, **_kwargs):
-        return BeautifulSoup(BANDCAMP_PAGE, "lxml")
-
-    monkeypatch.setattr(bandcamp.Searcher, "fetch_page", fetch_page)
+    monkeypatch.setattr(
+        bandcamp.Searcher,
+        "fetch_search_results",
+        _answer(
+            [
+                {
+                    "type": "a",
+                    "name": "Test Album",
+                    "band_name": "Test Artist",
+                    "item_url_root": "https://testartist.bandcamp.com",
+                    "item_url_path": "/album/test-album",
+                }
+            ]
+        ),
+    )
 
     shown = _shown(anyio.run(bandcamp.Searcher().search_releases, "test album", 5))
 
-    assert shown == "Test Artist - Test Album {Tracks: 3} testartist"
+    assert shown == "Test Artist - Test Album testartist"
 
 
 def test_discogs_result_without_a_year_source_or_label_shows_no_none(monkeypatch) -> None:

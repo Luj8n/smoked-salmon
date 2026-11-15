@@ -1,5 +1,5 @@
-import re
 from typing import Any
+from urllib.parse import urljoin, urlsplit
 
 from salmon.errors import ScrapeError
 from salmon.search.base import IdentData, SearchMixin
@@ -7,54 +7,50 @@ from salmon.sources import BandcampBase
 
 
 class Searcher(BandcampBase, SearchMixin):
+    search_api_url = "https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic"
+
+    async def fetch_search_results(self, searchstr: str) -> list[dict[str, Any]]:
+        # The public autocomplete endpoint works where the HTML search returns a Client Challenge.
+        payload = {"search_text": searchstr, "search_filter": "", "full_page": False, "fan_id": None}
+        async with self._session() as session, session.post(self.search_api_url, json=payload) as response:
+            data = await self.handle_json_response(response)
+        auto = data.get("auto") if isinstance(data, dict) else None
+        results = auto.get("results") if isinstance(auto, dict) else None
+        if not isinstance(results, list):
+            raise ScrapeError("Bandcamp: Search response is missing its results.")
+        return [item for item in results if isinstance(item, dict) and item.get("type") in ("a", "t")]
+
     async def search_releases(self, searchstr: str, limit: int) -> tuple[str, dict]:
         releases: dict[Any, Any] = {}
-        try:
-            soup = await self.fetch_page(self.search_url, params={"q": searchstr}, follow_redirects=False)
-            for meta in soup.select(".result-items .searchresult.data-search .result-info"):
-                try:
-                    item_url_elem = meta.select(".itemurl a")[0]
-                    item_url_str = item_url_elem.string if item_url_elem else None
-                    if not item_url_str:
-                        continue
-                    re_url = self.regex.search(item_url_str)
-                    if not re_url:
-                        continue
-
-                    rls_url = re.sub(r"\?.+", "", re_url[1])
-                    release_type = re_url[2]  # 'album' or 'track'
-                    rls_id = re_url[3]
-
-                    heading_elem = meta.select(".heading a")[0]
-                    title_str = heading_elem.string if heading_elem else None
-                    title = title_str.strip() if title_str else ""
-                    if len(title) > 100:
-                        title = f"{title[:98]}.."
-
-                    subhead_match = re.search("by (.+)", meta.select(".subhead")[0].text)
-                    artists = subhead_match[1].strip() if subhead_match else ""
-
-                    # For single tracks, there's just one track
-                    length_match = re.search(r"(\d+) tracks?", meta.select(".length")[0].text)
-                    track_count = 1 if release_type == "track" else int(length_match[1]) if length_match else 1
-
-                    releaser = rls_url.split(".bandcamp.com")[0]
-                    date = meta.select(".released")[0].text.strip()
-                    year_match = re.search(r"(\d{4})", date)
-                    year = year_match[1] if year_match else None
-
-                    releases[(rls_url, release_type, rls_id)] = (
-                        IdentData(artists, title, year, track_count, "WEB"),
-                        self.format_result(artists, title, self.edition(year, releaser), track_count=track_count),
-                    )
-
-                    if len(releases) == limit:
-                        break
-
-                except (TypeError, IndexError):
-                    continue
-
+        if limit <= 0:
             return "Bandcamp", releases
-
-        except Exception as e:
-            raise ScrapeError(f"Failed to parse Bandcamp search results: {str(e)}") from e
+        results = await self.fetch_search_results(searchstr)
+        # Album tracks can rank above their parent album; keep that album within the result limit.
+        for meta in sorted(results, key=lambda item: item["type"] != "a"):
+            root, path = meta.get("item_url_root"), meta.get("item_url_path")
+            title, artists = meta.get("name"), meta.get("band_name")
+            if not isinstance(root, str) or not isinstance(path, str):
+                continue
+            if not isinstance(title, str) or not isinstance(artists, str):
+                continue
+            if not all(value.strip() for value in (root, path, title, artists)):
+                continue
+            try:
+                url = urlsplit(urljoin(root, path))
+                match = self.regex.fullmatch(url._replace(query="", fragment="").geturl())
+            except ValueError:
+                continue
+            if not match or match[2] != {"a": "album", "t": "track"}[meta["type"]]:
+                continue
+            domain, release_type, slug = match.groups()
+            title, artists = title.strip(), artists.strip()
+            # Autocomplete supplies neither release dates nor album track counts. Fetch them only on selection.
+            track_count = 1 if release_type == "track" else None
+            shown_title = f"{title[:98]}.." if len(title) > 100 else title
+            releases[(domain, release_type, slug)] = (
+                IdentData(artists, title, None, track_count, "WEB"),
+                self.format_result(artists, shown_title, domain.removesuffix(".bandcamp.com"), track_count=track_count),
+            )
+            if len(releases) == limit:
+                break
+        return "Bandcamp", releases
