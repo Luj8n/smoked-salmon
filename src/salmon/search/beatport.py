@@ -5,15 +5,17 @@ import asyncclick as click
 import msgspec
 
 from salmon import cfg
-from salmon.common import handle_scrape_errors
 from salmon.common.strings import artists_or_various
 from salmon.errors import ScrapeError
 from salmon.search.base import IdentData, SearchMixin
 from salmon.sources import BeatportBase
 from salmon.sources.beatport import TokenStorage
+from salmon.sources.retry import blocks_fallback, transient
 
 
 class Searcher(BeatportBase, SearchMixin):
+    retry_gets = True
+
     async def search_releases_api(self, token_storage: TokenStorage, searchstr: str, limit: int) -> tuple[str, dict]:
         params = {"q": searchstr, "type": "releases"}
         resp = await self.get_json("/catalog/search/", params=params, headers=token_storage.get_auth_header())
@@ -91,12 +93,11 @@ class Searcher(BeatportBase, SearchMixin):
     async def search_releases(self, searchstr: str, limit: int) -> tuple[str, dict]:
         token_storage = await self.load_token_storage()
         if token_storage:
-            resp: tuple[str, dict] | None = await handle_scrape_errors(
-                self.search_releases_api(token_storage, searchstr, limit)
-            )
-            if resp:
-                return resp
-            else:
+            try:
+                return await self.search_releases_api(token_storage, searchstr, limit)
+            except ScrapeError as error:
+                if transient(error) or blocks_fallback(error):
+                    raise  # An exhausted retry or cooldown must not trigger more requests through the scraper.
                 click.secho("Beatport API error, falling back to scraper", fg="yellow")
 
         return await self.search_releases_scraping(searchstr, limit)

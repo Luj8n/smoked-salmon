@@ -13,6 +13,7 @@ from salmon import ssrf
 from salmon.constants import UAGENTS
 from salmon.errors import ScrapeError
 from salmon.proxy import session_kwargs
+from salmon.sources.retry import SourceHTTPError, retry_get
 
 if TYPE_CHECKING:
     from yarl import URL
@@ -44,6 +45,7 @@ class BaseScraper:
     # The store's key in [proxy.services], whose proxy its sessions go through. None for no proxy.
     proxy_service: str | None = None
     # Seconds each request made through _session may take in all, unless the caller of _session passes its own.
+    retry_gets = False
     timeout: float = 10
     # The store's name in error messages ("Apple Music"), so a multi-store search says which one failed; None: the
     # class's name.
@@ -107,12 +109,13 @@ class BaseScraper:
                 error_data = await resp.text()
             except Exception:
                 error_data = None
-            raise ScrapeError(error_msg, error_data)
+            raise SourceHTTPError(error_msg, resp.status, resp.headers.get("Retry-After"), error_data)
         try:
             return msgspec.json.decode(await resp.read())
         except msgspec.DecodeError as e:
             raise ScrapeError(f"{self.store or self.__class__.__name__}: Did not receive JSON from API.") from e
 
+    @retry_get
     async def get_json(self, url: str, params: dict | None = None, headers: dict | None = None) -> dict:
         """Make async GET request to JSON API.
 
@@ -156,6 +159,7 @@ class BaseScraper:
         soup, _ = await self._fetch_page_at(url, params, headers, follow_redirects)
         return soup
 
+    @retry_get
     async def _fetch_page_at(
         self, url: str, params: dict | None = None, headers: dict | None = None, follow_redirects: bool = True
     ) -> "tuple[BeautifulSoup, URL]":
@@ -166,7 +170,12 @@ class BaseScraper:
             session.get(url, params=params, headers=headers or HEADERS, allow_redirects=follow_redirects) as r,
         ):
             if r.status != 200:
-                raise ScrapeError(f"Failed to successfully scrape page. Status code: {r.status}")
+                raise SourceHTTPError(
+                    f"Failed to successfully scrape page. Status code: {r.status}",
+                    r.status,
+                    r.headers.get("Retry-After"),
+                    (await r.content.read(16384)).decode("utf-8", errors="replace"),
+                )
             data = await r.read()
             return BeautifulSoup(data, "lxml"), r.url
 

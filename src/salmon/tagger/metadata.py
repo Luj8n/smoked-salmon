@@ -202,7 +202,7 @@ def _print_search_results(results, rls_data=None):
     choices = {}
     choice_id = 1
     searched = searched_sources()
-    not_found = list(searched.keys())
+    not_found = [source for source in searched if source in results]
     inactive_sources = []
     source_errors = searched.keys() - [r for r in results]
 
@@ -473,6 +473,7 @@ async def _select_choice(
         if None in metadatas:
             # Said above, as a scrape error: the question again, for a number as for a URL (#968).
             rls_data["urls"] = urls
+            default = res.strip()
             continue
         return _combine_scraped(sources, list(metadatas), rls_data, source_url), source_url
 

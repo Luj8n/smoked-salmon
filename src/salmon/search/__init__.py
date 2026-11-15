@@ -126,8 +126,8 @@ async def run_metasearch(
     answers: dict[str, list[Any]] = {}
     tasks = [
         handle_scrape_errors(s.Searcher().search_releases(search, limit), say=partial(say_store_failed, name))
-        for search in searchstrs
         for name, s in sources.items()
+        for search in ([musicbrainz.album_query(artists, album)] if name == "MusicBrainz" and album else searchstrs)
     ]
     with each_failed_part_said_once():
         task_responses = await asyncio.gather(*tasks)

@@ -6,6 +6,8 @@ from copy import copy
 from itertools import chain
 from typing import Any
 
+import anyio.to_thread
+
 from salmon import cfg
 from salmon.common import RE_USELESS_VERSION, fetch_genre, less_uppers, normalize_accents, split_genre
 from salmon.common.strings import join_artists, names_no_artist, reaches_various_threshold
@@ -38,7 +40,8 @@ class MetadataMixin(ABC):
 
         data = {
             "title": self.parse_release_title(soup),
-            "cover": self.parse_cover_url(soup),
+            # MusicBrainz's cover parser makes a synchronous Cover Art Archive request.
+            "cover": await anyio.to_thread.run_sync(self.parse_cover_url, soup),
             "genres": standardize_genres(
                 [
                     g

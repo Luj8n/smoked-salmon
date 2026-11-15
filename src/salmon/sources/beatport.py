@@ -15,6 +15,9 @@ from salmon.common import handle_scrape_errors
 from salmon.config import get_user_cfg_path
 from salmon.errors import ScrapeError
 from salmon.sources.base import BaseScraper
+from salmon.sources.retry import blocks_fallback
+
+MAX_TRACK_PAGES = 20
 
 
 class TokenStorage(msgspec.Struct):
@@ -94,12 +97,16 @@ class BeatportBase(BaseScraper):
             try:
                 token_storage = await self.initial_setup()
             except ScrapeError as e:
+                if blocks_fallback(e):
+                    raise
                 click.secho(f"Beatport login failed: {_sentence(e)} Using the scraper.", fg="yellow")
                 return None
         if token_storage and token_storage.expires < time() + 10:  # leave some wiggle room
             try:
                 token_storage = await self.refresh_bearer_token(token_storage)
             except ScrapeError as e:
+                if blocks_fallback(e):
+                    raise
                 click.secho(
                     f"Beatport token refresh failed: {_sentence(e)} Using the scraper. If this repeats, delete "
                     f"{TokenStorage._get_storage_file()} so salmon logs in again.",
@@ -226,25 +233,28 @@ class BeatportBase(BaseScraper):
             match = self.regex.match(url)
             if not match:
                 raise ScrapeError("Invalid Beatport URL format")
-            rls_id = match.group(1)
+            rls_id = match[1]
 
+        assert rls_id is not None  # The required URL capture above supplies it when not passed explicitly.
         params = params or {}
         release_resp = await self.get_json(
             f"/catalog/releases/{rls_id}/", params=params, headers=token_storage.get_auth_header()
         )
 
-        tracks = []
-        params["release_id"] = rls_id
-        params["per_page"] = 100
+        tracks = await self._release_tracks(rls_id, token_storage.get_auth_header(), params)
+        return {"tracks": tracks, "release": release_resp}
 
-        for page in range(1, 9999):
+    async def _release_tracks(self, rls_id: str | int, headers: dict, params: dict | None = None) -> list[dict]:
+        """Fetch a release's tracks through an account token or the public page's anonymous session."""
+        params = {**(params or {}), "release_id": rls_id, "per_page": 100}
+        tracks = []
+        for page in range(1, MAX_TRACK_PAGES + 1):
             params["page"] = page
-            resp = await self.get_json("/catalog/tracks/", params=params, headers=token_storage.get_auth_header())
+            resp = await self.get_json("/catalog/tracks/", params=params, headers=headers)
             tracks.extend(resp["results"])
             if not resp["next"]:
-                break
-
-        return {"tracks": tracks, "release": release_resp}
+                return tracks
+        raise ScrapeError(f"Beatport release has more than {MAX_TRACK_PAGES} pages of tracks")
 
     async def fetch_data_scraping(
         self,
@@ -270,20 +280,28 @@ class BeatportBase(BaseScraper):
                 raise ScrapeError("Could not find Next.js data script tag")
 
             data = msgspec.json.decode(str(script_tag.string))
-            queries = data["props"]["pageProps"]["dehydratedState"]["queries"]
+            props = data["props"]["pageProps"]
+            queries = props["dehydratedState"]["queries"]
 
             track_query = next((q for q in queries if q.get("queryKey") and q["queryKey"][0] == "tracks"), None)
-            if not track_query:
-                raise ScrapeError("Could not find track data in page")
 
             release_query_regex = re.compile(r"release-\d+")
             release_query = next(
-                (q for q in queries if q.get("queryKey") and release_query_regex.match(q["queryKey"][0])), None
+                (q for q in queries if q.get("queryKey") and release_query_regex.fullmatch(q["queryKey"][0])), None
             )
             if not release_query:
                 raise ScrapeError("Could not find release data in page")
 
-            return {"tracks": track_query["state"]["data"]["results"], "release": release_query["state"]["data"]}
+            release = release_query["state"]["data"]
+            if track_query and not track_query["state"]["data"].get("next"):
+                tracks = track_query["state"]["data"]["results"]
+            else:
+                # New pages load the tracklist separately, using this public browsing token.
+                token = (props.get("anonSession") or {}).get("access_token")
+                if not token:
+                    raise ScrapeError("Beatport page has no track data or anonymous session")
+                tracks = await self._release_tracks(release["id"], {"Authorization": f"Bearer {token}"})
+            return {"tracks": tracks, "release": release}
 
         except msgspec.DecodeError as e:
             raise ScrapeError("Failed to parse Beatport JSON data") from e

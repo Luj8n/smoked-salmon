@@ -76,7 +76,14 @@ class QobuzBase(BaseScraper):
             if not match:
                 raise ScrapeError("Invalid Qobuz URL.")
             rls_id = match[1]
-            return await self.get_json(self.release_format.format(rls_id=rls_id), params=params, headers=self.headers)
+            album = await self.get_json(self.release_format.format(rls_id=rls_id), params=params, headers=self.headers)
+            tracks = album.get("tracks") or {}
+            total = tracks.get("total")
+            if isinstance(total, int) and total > len(tracks.get("items") or []):
+                raise ScrapeError(
+                    f"Qobuz returned an incomplete tracklist ({len(tracks.get('items') or [])} of {total} tracks)."
+                )
+            return album
         except msgspec.DecodeError as e:
             raise ScrapeError("Qobuz page did not return valid JSON.") from e
         except (AttributeError, IndexError) as e:

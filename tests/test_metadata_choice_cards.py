@@ -88,7 +88,6 @@ Results for Deezer:
 > 07 Artist - Album (2020) [10 tracks] | https://www.deezer.com/album/d1
 
 No results found from MusicBrainz.
-No results found from Apple Music.
 No results found from Beatport.
 No results found from Tidal.
 Discogs is inactive. Add its credentials to config.toml to enable it.

@@ -306,3 +306,28 @@ def test_a_web_tag_job_asks_again_when_its_url_fails(monkeypatch, tag_world: Pat
 
     _with_app(serving)
     assert store.requests == ["/releases/1"]
+
+
+def test_a_failed_selection_stays_pretyped_with_its_source_star(monkeypatch) -> None:
+    store = Store()
+    replies = iter(["*2 1", "*2"])
+    defaults = []
+
+    async def prompt(*_args: Any, **kwargs: Any) -> str:
+        defaults.append(kwargs.get("default"))
+        return next(replies)
+
+    monkeypatch.setattr(metadata_mod.interaction, "prompt", prompt)
+    choices = {1: ("Discogs", "1"), 2: ("Discogs", "2")}
+
+    async def pick() -> tuple[dict[str, Any], str | None]:
+        async with store.serving():
+            pointed_at(monkeypatch, store)
+            return await metadata_mod._select_choice(choices, _rls_data(), default="1")
+
+    metadata, source_url = anyio.run(pick)
+
+    assert defaults == ["1", "*2 1"]
+    assert source_url == WORKING_URL
+    assert FAILING_URL not in metadata["urls"]
+    assert metadata["title"] == RELEASE["title"]

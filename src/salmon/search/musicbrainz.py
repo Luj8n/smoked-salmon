@@ -1,11 +1,30 @@
+import re
 from typing import Any
 
 import musicbrainzngs
 
 from salmon import cfg
+from salmon.common.strings import names_no_artist
 from salmon.errors import ScrapeError
 from salmon.search.base import IdentData, SearchMixin
 from salmon.sources import MusicBrainzBase
+
+
+def album_query(artists: list[str] | None, album: str) -> str:
+    """An album search across the right Lucene fields; bare text only searches release titles."""
+
+    def quoted(value: str) -> str:
+        escaped = re.sub(r'([+\-&|!(){}\[\]^"~*?:\\/])', r"\\\1", value)
+        return f'"{escaped}"'
+
+    query = f"release:{quoted(album)}"
+    names = dict.fromkeys(name for name in artists or [] if name.strip() and not names_no_artist(name))
+    if names:
+        artist_query = " OR ".join(f"artist:{quoted(name)}" for name in names)
+        if len(names) > 1:
+            artist_query = f"({artist_query})"
+        query = f"{artist_query} AND {query}"
+    return query
 
 
 class Searcher(MusicBrainzBase, SearchMixin):

@@ -8,6 +8,7 @@ from .base import BaseScraper
 
 AMP_API_URL = "https://amp-api.music.apple.com"
 APPLE_MUSIC_URL = "https://music.apple.com"
+MAX_TRACK_PAGES = 20
 
 
 class AppleMusicBase(BaseScraper):
@@ -136,15 +137,22 @@ class AppleMusicBase(BaseScraper):
             tracks_next = tracks_rel.get("next")
 
             offset = len(tracks_data)
-            while tracks_next:
+            for _ in range(MAX_TRACK_PAGES - 1):
+                if not tracks_next:
+                    break
                 page_data = await self.get_json(
                     f"{AMP_API_URL}/v1/catalog/{sf}/albums/{album_id}/tracks",
                     params={"offset": offset, "l": lang},
                     headers=request_headers,
                 )
-                tracks_data.extend(page_data.get("data", []))
                 tracks_next = page_data.get("next")
-                offset += len(page_data.get("data", []))
+                page_tracks = page_data.get("data", [])
+                if not page_tracks and tracks_next:
+                    raise ScrapeError("Apple Music returned an empty track page with more pages pending")
+                tracks_data.extend(page_tracks)
+                offset += len(page_tracks)
+            if tracks_next:
+                raise ScrapeError(f"Apple Music release has more than {MAX_TRACK_PAGES} pages of tracks")
 
             return {
                 "album": album_data.get("attributes", {}),

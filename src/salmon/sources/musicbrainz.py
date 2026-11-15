@@ -1,22 +1,26 @@
 import re
+import ssl
+import time
 from collections.abc import Callable
 from typing import Any
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 import anyio.to_thread
 import musicbrainzngs
 from musicbrainzngs import musicbrainz as mb_module
 
 from salmon.errors import ScrapeError
+from salmon.release_notification import get_version
+from salmon.sources.retry import RETRY_DELAYS, TRANSIENT_STATUSES, browser_check, retry_delay, say_retry
 
 from .base import BaseScraper
 
-musicbrainzngs.set_useragent("salmon", "1.0", "noreply@salm.on")
+musicbrainzngs.set_useragent("smoked-salmon", get_version(), "https://github.com/smokin-salmon/smoked-salmon")
 
 # musicbrainzngs has no timeout and tries a failing request up to 8 times (7 retries, sleeping 56 s in all). Every
 # request it makes, the Cover Art Archive's too, goes through its private _safe_read, so that is where it is bounded.
 # A test pins the parameters the wrapper passes.
-MAX_REQUESTS = 2  # One retry, after its 2 s sleep
+MAX_REQUESTS = len(RETRY_DELAYS) + 1
 REQUEST_TIMEOUT = 10  # Seconds per socket operation
 
 _safe_read = mb_module._safe_read
@@ -33,10 +37,47 @@ class _TimeoutOpener:
 
 
 def _bounded_safe_read(opener, req, body=None):
-    return _safe_read(_TimeoutOpener(opener), req, body, max_retries=MAX_REQUESTS)
+    waited = 0.0
+    for attempt in range(MAX_REQUESTS):
+        try:
+            # Own the whole retry budget: do not multiply it by the library's internal retries.
+            return _safe_read(_TimeoutOpener(opener), req, body, max_retries=1)
+        except mb_module.WebServiceError as error:
+            if body is not None or req.get_method() != "GET" or not _transient(error.cause):
+                raise
+            after = error.cause.headers.get("Retry-After") if isinstance(error.cause, HTTPError) else None
+            delay = retry_delay(attempt, after, waited)
+            if delay is None:
+                raise
+            say_retry("MusicBrainz / Cover Art Archive", delay)
+            time.sleep(delay)
+            waited += delay
+    raise AssertionError("unreachable")
 
 
 mb_module._safe_read = _bounded_safe_read
+
+
+def _is_browser_check(error: HTTPError) -> bool:
+    """Inspect only a small error body; never expose its URLs, cookies or other contents in the log."""
+    cached = getattr(error, "_salmon_browser_check", None)
+    if cached is not None:
+        return cached
+    try:
+        body = error.read(16384).decode("utf-8", errors="replace")
+    except (OSError, ValueError, AttributeError):
+        return False
+    challenged = browser_check(body)
+    error.__dict__["_salmon_browser_check"] = challenged
+    return challenged
+
+
+def _transient(cause: Any) -> bool:
+    if isinstance(cause, HTTPError):
+        return cause.code in TRANSIENT_STATUSES and not _is_browser_check(cause)
+    if isinstance(cause, URLError):
+        cause = cause.reason
+    return not isinstance(cause, ssl.SSLError) and isinstance(cause, (TimeoutError, ConnectionError))
 
 
 class MusicBrainzBase(BaseScraper):
@@ -58,6 +99,15 @@ class MusicBrainzBase(BaseScraper):
         except mb_module.WebServiceError as e:
             if isinstance(e.cause, HTTPError) and e.cause.code == 404:
                 raise ScrapeError(f"{self.store or self.__class__.__name__}: Not found.") from e
+            if isinstance(e.cause, HTTPError):
+                if _is_browser_check(e.cause):
+                    raise ScrapeError(
+                        f"MusicBrainz: Browser verification page received (HTTP {e.cause.code}); "
+                        "the API request was blocked. Try again later."
+                    ) from e
+                raise ScrapeError(
+                    f"{self.store or self.__class__.__name__}: Request failed (HTTP {e.cause.code})."
+                ) from e
             raise ScrapeError(f"{self.store or self.__class__.__name__}: Request failed ({type(e).__name__}).") from e
 
     async def fetch_data(

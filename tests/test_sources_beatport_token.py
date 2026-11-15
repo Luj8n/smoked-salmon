@@ -10,7 +10,7 @@ from aiohttp import web
 from salmon import cfg
 from salmon.errors import ScrapeError
 from salmon.search import beatport as beatport_search
-from salmon.sources import beatport
+from salmon.sources import beatport, retry
 from salmon.tagger.sources import beatport as beatport_tagger
 
 SCRAPED = ("Beatport", {"scraped": True})
@@ -92,10 +92,17 @@ async def _search_with_a_failed_first_login(monkeypatch) -> tuple[str, dict]:
 
 def test_a_failed_first_login_falls_back_to_the_scraper_in_search(monkeypatch, capsys) -> None:
     # The login ran outside handle_scrape_errors, so the docs page failing dropped Beatport from the search
+    waits = []
+
+    async def sleep(delay):
+        waits.append(delay)
+
+    monkeypatch.setattr(retry.anyio, "sleep", sleep)
     found = anyio.run(_search_with_a_failed_first_login, monkeypatch)
 
     out = capsys.readouterr().out
     assert found == SCRAPED
+    assert len(waits) == 2
     assert "Beatport login failed: Failed to successfully scrape page. Status code: 500. Using the scraper." in out
 
 
