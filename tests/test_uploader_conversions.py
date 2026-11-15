@@ -139,6 +139,11 @@ def _interactive_choice(monkeypatch, answer: str | None = None, **kwargs: Any) -
     return anyio.run(run), asked
 
 
+def test_repeated_conversion_choices_schedule_each_format_once(monkeypatch):
+    selected, _ = _interactive_choice(monkeypatch, "2 1 2 01")
+    assert selected == ["MP3 320", "16bit 48.0 kHz"]
+
+
 @pytest.mark.parametrize(
     ("conversions", "default", "names"),
     [
