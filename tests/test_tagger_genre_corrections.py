@@ -88,6 +88,11 @@ def test_with_no_corrections_the_genres_are_unchanged(corrections) -> None:
     assert _genres(["Jazz", "Jazz contemporain"]) == standardize_genres(["Jazz", "Jazz contemporain"])
 
 
+def test_dutch_world_category_is_translated_before_review(corrections) -> None:
+    corrections({})
+    assert _genres(["Wereldmuziek"], files=["Wereldmuziek"]) == ["World Music"]
+
+
 @pytest.mark.parametrize("genres", [{" ": ["Jazz"]}, {"Jazz contemporain": ["Jazz", " "]}])
 def test_a_correction_with_an_empty_genre_is_refused(genres: dict[str, list[str]]) -> None:
     with pytest.raises(ValueError, match="metadata.corrections.genres has an empty name"):

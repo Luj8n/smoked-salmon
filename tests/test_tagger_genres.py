@@ -213,7 +213,7 @@ def test_source_genres_reach_the_tracker_as_valid_tags():
     assert _tags(["Dance", "Dance / Pop"]) == ["Dance", "Pop"]
     assert _tags(["\u00c9lectronique\u2192Dance"]) == ["Electronic", "Dance"]
     # Discogs: the "&" used to survive as the junk tag "and.Country".
-    assert _tags(["Folk, World, & Country"]) == ["Folk", "World", "Country"]
+    assert _tags(["Folk, World, & Country"]) == ["Folk", "World.Music", "Country"]
 
 
 def test_manual_metadata_genres_are_standardized(monkeypatch):
@@ -227,7 +227,11 @@ def test_manual_metadata_genres_are_standardized(monkeypatch):
     ]
 
     edited["genres"] = "Folk, World, & Country"
-    assert anyio.run(lambda: metadata_module._get_manual_metadata(rls_data))["genres"] == ["Folk", "World", "Country"]
+    assert anyio.run(lambda: metadata_module._get_manual_metadata(rls_data))["genres"] == [
+        "Folk",
+        "World Music",
+        "Country",
+    ]
 
 
 def test_store_split_tables_still_yield_valid_tags():
@@ -293,3 +297,19 @@ def test_bracketed_genre_leaves_no_half_bracket_piece():
     for genre in genres:
         assert genre.count("(") == genre.count(")")
         assert not genre.startswith(")") and not genre.endswith("(")
+
+
+def test_qobuz_dutch_alternative_category_matches_english_and_deduplicates():
+    assert (
+        standardize_genres(["Alternative en Indie"]) == standardize_genres(["Alternative & Indie"]) == ["Alternative"]
+    )
+    assert standardize_genres(["Alternative en Indie", "Alternative"]) == ["Alternative"]
+
+
+def test_shoegazer_alias_produces_one_shoegaze_tag():
+    assert _tags(["shoegazer", "Shoegaze", "shoe.gaze"]) == ["Shoegaze"]
+
+
+def test_dutch_world_category_is_translated_and_deduplicated():
+    assert standardize_genres(["Wereldmuziek", "World", "World Music", "Musiques du monde"]) == ["World Music"]
+    assert _tags(["Wereldmuziek"]) == ["World.Music"]

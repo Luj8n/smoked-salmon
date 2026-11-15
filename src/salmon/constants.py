@@ -316,6 +316,7 @@ GENRE_LIST = {
     "score": {"Score"},
     "screamo": {"Screamo"},
     "shoegaze": {"Shoegaze"},
+    "shoegazer": {"Shoegaze"},
     "singersongwriter": {"Singer & Songwriter"},
     "singerandsongwriter": {"Singer & Songwriter"},
     "ska": {"Ska"},
@@ -351,6 +352,7 @@ GENRE_LIST = {
     "vaporwave": {"Vaporwave"},
     "videogame": {"Video Game"},
     "vocal": {"Vocal"},
+    "world": {"World Music"},
     "worldmusic": {"World Music"},
     # French to English
     "musiqueelectronique": {"Electronic"},
@@ -369,6 +371,9 @@ GENRE_LIST = {
     # Spanish to English
     "musicaelectronica": {"Electronic"},
     "musicaclasica": {"Classical"},
+    # Dutch to English
+    "alternativeenindie": {"Alternative"},
+    "wereldmuziek": {"World Music"},
     # Common mistranslations or variants
     "electronica": {"Electronic"},
     "indieandalternative": {"Indie"},
