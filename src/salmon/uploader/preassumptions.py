@@ -66,7 +66,7 @@ def print_preassumptions(
             fg="yellow",
         )
 
-    if lossy and not spectrals and not spectral_url_tracks:
+    if lossy and spectrals == (0,) and not spectral_url_tracks and not spectrals_after:
         raise UploadError("\nYou cannot report a torrent for lossy master without spectrals.")
 
 
