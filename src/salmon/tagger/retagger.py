@@ -141,6 +141,7 @@ def collect_album_data(metadata):
         for k, v in {
             "album": title,
             "genre": sorted(metadata["genres"]),
+            "releasetype": metadata.get("rls_type"),
             "date": metadata["group_year"],
             "label": metadata["label"],
             "catno": metadata["catno"],

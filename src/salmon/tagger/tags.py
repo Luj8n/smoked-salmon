@@ -18,6 +18,7 @@ TAG_PRINT_ORDER = [
     "albumartist",
     "date",
     "genre",
+    "releasetype",
     "composer",
     "conductor",
     "remixer",

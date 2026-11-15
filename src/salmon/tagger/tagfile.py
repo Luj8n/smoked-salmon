@@ -19,6 +19,7 @@ TAG_FIELDS = {
         "label": "label",
         "catno": "catalognumber",
         "genre": "genre",
+        "releasetype": "releasetype",
         "composer": "composer",
         "conductor": "conductor",
         "remixer": "remixer",
@@ -40,6 +41,7 @@ TAG_FIELDS = {
         "date": ["TDRC", "TYER"],
         "label": ["TPUB"],
         "genre": ["TCON"],
+        "releasetype": ["TXXX:RELEASETYPE"],
         "composer": ["TCOM"],
         "conductor": ["TPE3"],
         "remixer": ["TPE4"],
@@ -119,7 +121,8 @@ class TagFile:
                     return self._mp3_comment()
                 field = TAG_FIELDS["MP3"][attr][0]
                 if field.startswith("TXXX:") and isinstance(mut.tags, ID3Tags):
-                    return _txxx_values(mut.tags, field)
+                    values = _txxx_values(mut.tags, field)
+                    return ("; ".join(values or []) or None) if attr == "releasetype" else values
                 return self.parse_tag(attr, "MP3")
             elif isinstance(mut, mp4.MP4):
                 tag = self.parse_tag(attr, "AAC")
