@@ -1,7 +1,7 @@
 import contextlib
 import os
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 
 import asyncclick as click
@@ -155,15 +155,36 @@ def _dsd_encoding(audio_info):
     raise click.Abort
 
 
+def _local_track_slots(tags):
+    """Reserve real numbers before assigning placeholders; duplicate tags are not reliable numbering."""
+    entries = []
+    for filename, track in sorted(tags.items(), key=lambda k: file_order_key(k[0])):
+        disc = number_text(track.discnumber or "1")
+        disc = str(read_number(disc)) if read_number(disc) is not None else disc
+        number = read_number(track.tracknumber)
+        entries.append((filename, track, disc, number))
+    counts = Counter((disc, number) for _, _, disc, number in entries if number is not None and number > 0)
+    occupied = defaultdict(set)
+    for (disc, number), count in counts.items():
+        if count == 1:
+            occupied[disc].add(number)
+    for index, (filename, track, disc, number) in enumerate(entries, 1):
+        numbered = number is not None and number > 0 and counts[disc, number] == 1
+        if numbered:
+            slot = number_text(track.tracknumber)
+        else:
+            while index in occupied[disc]:
+                index += 1
+            occupied[disc].add(index)
+            slot = str(index)
+        yield filename, track, disc, slot, numbered
+
+
 def create_track_list(tags, overwrite, audio_info=None):
     """Generate the track data from each track tag."""
     audio_info = audio_info or {}
     tracks = defaultdict(dict)
-    for trackindex, (filename, track) in enumerate(sorted(tags.items(), key=lambda k: file_order_key(k[0])), 1):
-        discnumber = track.discnumber or "1"
-        own_number = number_text(track.tracknumber) if track.tracknumber else ""
-        numbered = (read_number(own_number) or 0) > 0
-        tracknumber = own_number if numbered else str(trackindex)
+    for filename, track, discnumber, tracknumber, numbered in _local_track_slots(tags):
         tracks[discnumber][tracknumber] = {
             "track#": tracknumber,
             "disc#": discnumber,

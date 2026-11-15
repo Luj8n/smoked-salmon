@@ -1,6 +1,38 @@
+from types import SimpleNamespace
+
 import pytest
 
-from salmon.tagger.pre_data import parse_artists
+from salmon.tagger.pre_data import create_track_list, parse_artists
+
+
+@pytest.mark.parametrize("numbers", [("1", "1"), (None, "1"), ("2", None), ("01", "1"), ("１", "1")])
+def test_colliding_track_numbers_never_drop_a_local_file(numbers):
+    tags = {
+        f"{index}.flac": SimpleNamespace(
+            artist=["Artist"],
+            title=f"Song {index}",
+            tracknumber=number,
+            discnumber="1",
+            tracktotal=None,
+            disctotal=None,
+            replay_gain=None,
+            peak=None,
+            isrc=f"ISRC{index}",
+        )
+        for index, number in enumerate(numbers)
+    }
+
+    tracks = create_track_list(tags, False)["1"]
+
+    assert {t["title"] for t in tracks.values()} == {"Song 0", "Song 1"}
+    assert len({int(n) for n in tracks}) == 2
+    if all(numbers):
+        assert all(not t["numbered"] for t in tracks.values())
+    else:
+        tagged_index = next(i for i, n in enumerate(numbers) if n)
+        tagged = next(t for t in tracks.values() if t["title"] == f"Song {tagged_index}")
+        assert tagged["numbered"] is True
+        assert tagged["track#"] == numbers[tagged_index]
 
 
 def test_feat_keeps_the_disambiguation_bracket_balanced() -> None:
