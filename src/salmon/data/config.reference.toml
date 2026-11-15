@@ -391,13 +391,20 @@
 [upload.ai_review]
 # Optional AI-assisted metadata verification after Salmon combines sources
 # enabled = false
+# "openai": the API (or a compatible base_url). "codex": the installed Codex CLI's saved login.
+# provider = "openai"
+# API provider only; Codex needs no key in this file. Run `codex login` with ChatGPT for subscription access.
 # api_key = "sk-..."
 # base_url = "https://api.openai.com/v1"
 # model = "gpt-5.4-2026-03-05"
+# Codex provider only. Requires a recent Codex CLI supporting `exec --ignore-user-config`.
+# codex_model = "gpt-6.1-sol"
+# Both providers. High is useful for conflicting release metadata; medium is faster.
 # reasoning_effort = "medium"
 # use_web_search = true
-# Increase this for slower reviews, especially with high/xhigh reasoning and web search.
+# Increase this for slower reviews, especially with high/xhigh reasoning and web search (e.g. 300 for Codex).
 # timeout_seconds = 45
+# API provider only; Codex runs a fresh, temporary session for each review, including a prompted rerun.
 # background = false
 
 # ===============================

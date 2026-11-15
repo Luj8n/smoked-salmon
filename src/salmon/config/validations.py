@@ -422,17 +422,21 @@ class UploadCompression(BaseStruct):
 
 class UploadAiReview(BaseStruct):
     enabled: bool = False
+    provider: Literal["openai", "codex"] = "openai"
     api_key: str | None = None
     base_url: str | None = None
     model: str = "gpt-5.4-2026-03-05"
+    codex_model: str = "gpt-6.1-sol"
     reasoning_effort: Literal["low", "medium", "high", "xhigh"] = "medium"
     use_web_search: bool = True
     timeout_seconds: Annotated[int, msgspec.Meta(ge=5, le=1800)] = 45
     background: bool = False
 
     def __post_init__(self):
-        if self.enabled and not self.api_key:
+        if self.enabled and self.provider == "openai" and not self.api_key:
             raise ValueError("upload.ai_review.api_key must be set when AI review is enabled")
+        if self.provider == "codex" and not self.codex_model.strip():
+            raise ValueError("upload.ai_review.codex_model must name a Codex model")
 
 
 # The conversions salmon up offers after a FLAC, by a name that holds whatever the release's rates are.

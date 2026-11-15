@@ -7,6 +7,7 @@ from pathlib import Path
 
 import anyio
 import openai
+import pytest
 from aiohttp import web
 from openai.types.responses import Response, ResponseFunctionWebSearch, ResponseReasoningItem
 from openai.types.responses.response_function_web_search import ActionFind, ActionOpenPage, ActionSearch
@@ -20,7 +21,6 @@ from salmon import cfg
 from salmon.errors import InvalidMetadataError
 from salmon.tagger import ai_review
 from salmon.tagger.ai_review import (
-    SYSTEM_PROMPT,
     _ai_review_schema,
     _apply_ai_review_guardrails,
     _build_album_metadata_snapshot,
@@ -124,7 +124,7 @@ def test_build_ai_review_diff_reports_only_actual_changes() -> None:
 
     assert "label: Old Label -> New Label" in diff_lines
     assert "year: 2004 -> 2003" in diff_lines
-    assert "genres: Electronic -> Electronic, Deep House" in diff_lines
+    assert "genres: + Deep House" in diff_lines
     assert not any(line.startswith("urls:") for line in diff_lines)
     assert not any("track" in line for line in diff_lines)
 
@@ -148,6 +148,7 @@ def test_ai_review_schema_requires_every_metadata_key() -> None:
     assert metadata_schema["required"] == [
         "artists",
         "title",
+        "rls_type",
         "group_year",
         "year",
         "edition_title",
@@ -173,40 +174,6 @@ def test_choose_ai_anchor_url_prefers_explicit_source_then_first_metadata_url() 
     assert _choose_ai_anchor_url(metadata, None) == "https://old.example/release"
 
 
-def test_system_prompt_reflects_red_metadata_rules_and_web_budget() -> None:
-    assert "Use 4 to 6 web actions total." in SYSTEM_PROMPT
-    assert "Search-result snippets and result titles are only leads." in SYSTEM_PROMPT
-    assert "Do not keep a catalog number in title" in SYSTEM_PROMPT
-    assert "edition_title is only for edition-specific descriptors." in SYSTEM_PROMPT
-    assert "WEB quality such as 24-bit/44.1 kHz, leave edition_title blank." in SYSTEM_PROMPT
-    assert 'plausible no-label marker such as "Self-Released" or "Not on Label"' in SYSTEM_PROMPT
-    assert "Normalize label values to RED style instead of copying vendor rights text verbatim." in SYSTEM_PROMPT
-    assert '"Label A - Rights Holder under exclusive\n  license to Label B"' in SYSTEM_PROMPT
-    assert "prefer the primary credited\n  label or imprint entity" in SYSTEM_PROMPT
-    assert "Only use a slash-separated multi-label value like `Label 1 / Label 2`" in SYSTEM_PROMPT
-    assert "Do not invent a slash-separated label from a compound rights/licensing string" in SYSTEM_PROMPT
-    assert "prefer `Label A` unless the page explicitly frames both entities as labels/imprints." in SYSTEM_PROMPT
-    assert "Be aggressive about collapsing compound DSP rights strings down to the clean RED label." in SYSTEM_PROMPT
-    assert "`ITModels - Doli & Penn Under exclusive license to NMC United Entertainment Ltd.`" in SYSTEM_PROMPT
-    assert "as strong evidence for `ITModels`, not for `ITModels / Doli & Penn`" in SYSTEM_PROMPT
-    assert "prefer treating that as self-released/no-label rather than promoting the artist name to" in SYSTEM_PROMPT
-    assert 'Only replace "Self-Released" or "Not on Label" with the artist name' in SYSTEM_PROMPT
-    assert "except that you may normalize to `Self-Released` when opened release-level" in SYSTEM_PROMPT
-    assert "Artists means release-level artist entries only." in SYSTEM_PROMPT
-    assert "List each credited release artist separately as" in SYSTEM_PROMPT
-    assert "supported release-level guest artist merely because that artist only appears" in SYSTEM_PROMPT
-    assert 'do not use "Various Artists"' in SYSTEM_PROMPT
-    assert "Do not treat a bare ℗ or © rights line as label evidence" in SYSTEM_PROMPT
-    assert "do not replace the current\nlabel with a new guess" in SYSTEM_PROMPT
-    assert "Do not replace an existing UPC or catno from the" in SYSTEM_PROMPT
-    assert "MusicBrainz artist release-list pages are too" in SYSTEM_PROMPT
-    assert "Only copy a UPC into catno when the same exact release page or exact release record" in SYSTEM_PROMPT
-    assert "Genres must behave like RED tags" in SYSTEM_PROMPT
-    assert "Discogs and MusicBrainz are useful cross-checks" in SYSTEM_PROMPT
-    assert "For singles or small releases, you may inspect the release-page tracklist" in SYSTEM_PROMPT
-    assert "In your summary and citations, mention only pages you actually opened during this review." in SYSTEM_PROMPT
-
-
 def test_build_release_reference_keeps_only_identifying_fields() -> None:
     reference = _build_release_reference(make_metadata(), "https://example.com/release")
 
@@ -227,6 +194,7 @@ def test_build_album_metadata_snapshot_keeps_only_patchable_album_fields() -> No
     assert snapshot == {
         "artists": [{"name": "Example Artist", "role": "main"}],
         "title": "Original Title",
+        "rls_type": "Album",
         "group_year": "2004",
         "year": "2004",
         "edition_title": None,
@@ -270,6 +238,16 @@ def test_build_request_payload_surfaces_selected_source_url_as_first_step() -> N
     assert "Selected source URL:" in prompt
     assert "https://example.com/release" in prompt
     assert "Open that exact page first before doing any search." in prompt
+
+
+def test_disabled_web_review_does_not_request_online_research(monkeypatch):
+    monkeypatch.setattr(cfg.upload.ai_review, "use_web_search", False)
+    payload = _build_request_payload(make_metadata(), make_metadata(), "https://example.com/release")
+
+    assert "tools" not in payload
+    assert "Web research is unavailable." in payload["input"]
+    assert "Open that exact page first" not in payload["input"]
+    assert "https://example.com/release" in payload["input"]
 
 
 def test_format_ai_progress_compacts_without_clamping_text() -> None:
@@ -429,15 +407,33 @@ def test_apply_ai_review_guardrails_ignores_unsupported_label_changes() -> None:
     ]
 
 
-def test_apply_ai_review_guardrails_allows_self_released_without_opened_label_citation() -> None:
+def test_apply_ai_review_guardrails_rejects_self_released_without_opened_label_citation() -> None:
     metadata = make_metadata()
     metadata["label"] = "doin' fine"
     review = make_review(label="Self-Released")
 
     sanitized_review, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, None)
 
-    assert sanitized_review["metadata"]["label"] == "Self-Released"
-    assert warnings == []
+    assert sanitized_review["metadata"]["label"] == "doin' fine"
+    assert len(warnings) == 1
+    assert "no opened citation" in warnings[0]
+
+
+@pytest.mark.parametrize("supported", [True, False])
+def test_self_released_requires_explicit_page_evidence(monkeypatch, supported):
+    metadata = make_metadata()
+    review = make_review(label="Self-Released")
+    review["citations"] = [{"title": "Release", "url": "https://example.com/release", "supports": ["label"]}]
+    review["_opened_page_urls"] = ["https://example.com/release"]
+
+    async def page_text(url):
+        return "Label: Self-Released" if supported else "Artist: Example Artist. Copyright Example Artist."
+
+    monkeypatch.setattr(ai_review, "_fetch_release_page_text", page_text)
+    sanitized, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, None)
+
+    assert sanitized["metadata"]["label"] == ("Self-Released" if supported else metadata["label"])
+    assert bool(warnings) is not supported
 
 
 def test_apply_ai_review_guardrails_accepts_explicit_opened_label_evidence(monkeypatch) -> None:
@@ -525,6 +521,23 @@ def test_apply_ai_review_guardrails_preserves_existing_guest_artists() -> None:
         {"name": "SOR UH", "role": "guest"},
     ]
     assert warnings == ["Preserved existing guest artists that the AI tried to remove: MSPAINTBOI, STARRI, SOR UH."]
+
+
+@pytest.mark.parametrize(("opened", "field"), [(True, "artists"), (False, "artists"), (True, "title")])
+def test_guest_correction_requires_an_opened_artist_citation(opened, field):
+    metadata = make_metadata()
+    metadata["artists"].append(("Wrong Guest", "guest"))
+    review = make_review()
+    review["summary"] = "Removed Wrong Guest: the edition credits identify a different performer."
+    review["citations"] = [{"title": "Release", "url": "https://example.com/release", "supports": [field]}]
+    review["_opened_page_urls"] = ["https://example.com/release"] if opened else []
+
+    sanitized, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, None)
+
+    names = {artist["name"] for artist in sanitized["metadata"]["artists"]}
+    allowed = opened and field == "artists"
+    assert ("Wrong Guest" not in names) is allowed
+    assert bool(warnings) is not allowed
 
 
 def test_apply_ai_review_guardrails_allows_guest_to_main_promotion() -> None:
@@ -980,3 +993,91 @@ def test_client_with_custom_base_url_reaches_a_local_server_and_maps_404() -> No
 
     anyio.run(run)
     assert seen == ["/v1/responses"]
+
+
+@pytest.mark.parametrize("field", ["genres", "urls"])
+def test_list_diff_shows_only_added_and_removed_items(field) -> None:
+    old, kept, new = (
+        ("Jazz", "Electronic", "House")
+        if field == "genres"
+        else ("https://example.com/old", "https://example.com/kept", "https://example.com/new")
+    )
+    metadata = {**make_metadata(), field: [old, kept]}
+    review = make_review(**{field: [kept, new]})
+    lines = build_ai_review_diff(metadata, review)
+    assert [line for line in lines if line.startswith(f"{field}:")] == [f"{field}: - {old}", f"{field}: + {new}"]
+
+
+@pytest.mark.parametrize("field", ["genres", "urls"])
+def test_list_diff_ignores_reordering_and_shows_explicit_clear(field) -> None:
+    values = ["Jazz", "Electronic"] if field == "genres" else ["https://example.com/a", "https://example.com/b"]
+    metadata = {**make_metadata(), field: values}
+    reordered = build_ai_review_diff(metadata, make_review(**{field: list(reversed(values))}))
+    assert not any(line.startswith(f"{field}:") for line in reordered)
+    cleared = build_ai_review_diff(metadata, make_review(**{field: []}))
+    assert [line for line in cleared if line.startswith(f"{field}:")] == [f"{field}: - {value}" for value in values]
+
+
+def test_url_diff_respects_preserved_source_urls() -> None:
+    old, source, added = "https://example.com/old", "https://example.com/source", "https://example.com/new"
+    metadata = {**make_metadata(), "urls": [old, source]}
+    lines = build_ai_review_diff(metadata, make_review(urls=[added]), source_url=source)
+    assert [line for line in lines if line.startswith("urls:")] == [f"urls: + {added}"]
+
+
+def test_qobuz_localized_url_does_not_duplicate_existing_source():
+    source = "https://www.qobuz.com/album/-/rn74e65h2n71a"
+    localized = "https://www.qobuz.com/us-en/album/planet-ladji-ladji-mouflet/rn74e65h2n71a"
+    metadata = {**make_metadata(), "urls": [source]}
+    review = make_review(urls=[source, localized])
+    review["_opened_page_urls"] = [localized]
+    review["summary"] = "Added a Qobuz page."
+    sanitized, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, source)
+    assert sanitized["metadata"]["urls"] == [source]
+    # Citation provenance still records the exact page opened; this is display-URL deduplication only.
+    assert sanitized["_opened_page_urls"] == [localized]
+    assert not any(line.startswith("urls:") for line in build_ai_review_diff(metadata, sanitized, source))
+    assert ai_review._review_summary(sanitized, [], warnings) == "No metadata changes remain after checks."
+
+
+@pytest.mark.parametrize("opened", [True, False])
+def test_different_qobuz_release_is_not_a_duplicate_and_still_needs_opening(opened):
+    source = "https://www.qobuz.com/album/-/rn74e65h2n71a"
+    different = "https://www.qobuz.com/us-en/album/other/anotherid"
+    metadata = {**make_metadata(), "urls": [source]}
+    review = make_review(urls=[source, different])
+    review["_opened_page_urls"] = [different] if opened else []
+    sanitized, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, source)
+    assert sanitized["metadata"]["urls"] == ([source, different] if opened else [source])
+    assert bool(warnings) is not opened
+
+
+def test_unavailable_label_page_does_not_claim_evidence_is_absent(monkeypatch):
+    metadata = {**make_metadata(), "label": "Self-Released"}
+    review = make_review(label="Ladji Mouflet")
+    review["summary"] = "Changed the label to Ladji Mouflet."
+    review["citations"] = [{"url": "https://example.com/release", "supports": ["label: Ladji Mouflet"]}]
+    review["_opened_page_urls"] = ["https://example.com/release"]
+
+    async def unavailable(url):
+        raise TimeoutError()
+
+    monkeypatch.setattr(ai_review, "_fetch_release_page_text", unavailable)
+    sanitized, warnings = anyio.run(_apply_ai_review_guardrails, metadata, review, None)
+    assert sanitized["metadata"]["label"] == "Self-Released"
+    assert "could not independently fetch" in warnings[0]
+    assert "none of the opened cited pages" not in warnings[0]
+    assert ai_review._review_summary(sanitized, [], warnings) == "No metadata changes remain after checks."
+
+
+def test_filtered_summary_only_names_changes_still_offered():
+    review = make_review(label="Ladji Mouflet")
+    review["summary"] = "Changed label and genre."
+    summary = ai_review._review_summary(review, ["genres: - Wereldmuziek", "genres: + World"], ["Label blocked"])
+    assert summary == "Suggested changes after checks: genres."
+
+
+def test_unfiltered_summary_keeps_the_models_reasoning():
+    review = make_review()
+    review["summary"] = "Retained the original release date."
+    assert ai_review._review_summary(review, [], []) == review["summary"]

@@ -18,6 +18,8 @@ A simple tool to take the work out of uploading on Gazelle-based trackers. It ge
 - **Lossy Master Report Generation** – Supports lossy master reports during upload.
 - **Metadata Retrieval** – Fetches metadata from:
   - Apple Music, Bandcamp, Beatport, Deezer, Discogs, MusicBrainz, Qobuz, Tidal.
+- **[AI Metadata Review](docs/ai-review.md)** – Optionally check album metadata against release pages using an API
+  provider or Codex with your existing ChatGPT login, then review the suggested changes before applying them.
 - **File Management** –  
   - Retags and renames files to standard formats (based on metadata).
   - Checks file integrity and sanitizes if needed.  
